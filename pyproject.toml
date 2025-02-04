@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "prayer-room-api"
+version = "0.1.0"
+description = ""
+authors = ["Andrew Miller <info@akmiller.co.uk>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+django = "^5.1.5"
+django-rest-framework = "^0.1.0"
+django-import-export = "^4.3.4"
+python-dateutil = "^2.9.0.post0"
+django-cors-headers = "^4.6.0"
+django-webhook = "^0.0.15"
+celery = "^5.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
