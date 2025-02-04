@@ -1,0 +1,60 @@
+from django.db import models
+from django.utils.timezone import now
+
+
+class PrayerInspiration(models.Model):
+    verse = models.CharField(max_length=255)
+    content = models.TextField()
+
+    def __str__(self):
+        return str(self.verse)
+
+
+class Location(models.Model):
+    name = models.CharField(max_length=255)
+    slug = models.SlugField()
+
+    def __str__(self):
+        return str(self.name)
+
+
+class PrayerPraiseRequest(models.Model):
+    class PrayerType(models.TextChoices):
+        PRAYER = 'prayer', "Prayer"
+        PRAISE = 'praise', "Praise"
+    created_at = models.DateTimeField(auto_now_add=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    type = models.CharField(choices=PrayerType, default=PrayerType.PRAYER, max_length=20)
+
+    name = models.CharField(max_length=255)
+    content = models.TextField()
+
+    prayer_count = models.IntegerField(default=0)
+
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='prayer_requests')
+
+    flagged_at = models.DateTimeField(null=True, blank=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name}: {self.content[:10]}"
+
+    def save(self, *args, **kwargs):
+        # this is manual until I have imported all the data
+        if not self.pk and not self.created_at:
+            self.created_at = now()
+        super().save(*args, **kwargs)
+
+
+class HomePageContent(models.Model):
+    key = models.CharField(max_length=50)
+    value = models.TextField()
+
+    def __str__(self):
+        return f"{self.key}"
+
+
+class Setting(models.Model):
+    name = models.CharField(max_length=255)
+    is_enabled = models.BooleanField(default=True)
+    button_text = models.CharField(max_length=255)
