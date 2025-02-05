@@ -24,7 +24,6 @@ RUN addgroup --system django \
 # Requirements are installed here to ensure they will be cached.
 RUN pipx ensurepath
 RUN pipx install poetry==2.0.0
-RUN pipx inject poetry poetry-plugin-shell
 # RUN ls /root/.local/bin
 # RUN echo $PATH
 COPY ./poetry.lock /poetry.lock
@@ -37,11 +36,11 @@ RUN /root/.local/bin/poetry install --no-root --no-directory
 COPY . .
 RUN /root/.local/bin/poetry install
 
-RUN /root/.local/bin/poetry shell python manage.py collectstatic --noinput --clear
+RUN /root/.local/bin/poetry run python manage.py collectstatic --noinput --clear
 
 # Run as non-root user
 RUN chown -R django:django /app
 USER django
 
 # Run application
-CMD /root/.local/bin/poetry shell gunicorn prayer_room_api.wsgi:application
+CMD /root/.local/bin/poetry run gunicorn prayer_room_api.wsgi:application
