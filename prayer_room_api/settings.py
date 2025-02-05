@@ -12,54 +12,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 
+from cbs import BaseSettings, env
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-y&^-#s$ee58d8&&xi_9kl1^38x)!0-1hgby+ofhdl23$8d6)$u'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
 ALLOWED_HOSTS = []
-
-
-# Application definition
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'import_export',
-    'rest_framework',
-    'rest_framework.authtoken',
-    "corsheaders",
-    "django_webhook",
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'prayer_room_api',
-]
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    "corsheaders.middleware.CorsMiddleware",
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "allauth.account.middleware.AccountMiddleware",
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-]
 
 ROOT_URLCONF = 'prayer_room_api.urls'
 
@@ -80,17 +38,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'prayer_room_api.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 
 # Password validation
@@ -123,13 +70,10 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -137,10 +81,86 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4000",
-    "https://api.prayer.thec3.uk"
-]
-
-
 DJANGO_WEBHOOK = dict(MODELS=["prayer_room_api.PrayerPraiseRequest", "prayer_room_api.Setting"])
+
+
+class Settings(BaseSettings):
+
+    # Allow production to override the secret key, but fall-back to something consistent.
+    SECRET_KEY = env('django-insecure-y&^-#s$ee58d8&&xi_9kl1^38x)!0-1hgby+ofhdl23$8d6)$u')
+
+    # DEBUG defaults to True, but can be overridden by env var `DJANGO_DEBUG`
+    DEBUG = env.bool(True, prefix='DJANGO_')
+
+    # Simple cases that don't need `self` can even use a lambda
+    MEDIA_ROOT = env(lambda self: BASE_DIR / 'media')
+
+    # Methods will be transparently invoked by the __getattr__ implementation
+    def INSTALLED_APPS(self):
+        return list(filter(None, [
+            'django.contrib.admin',
+            'django.contrib.auth',
+            'django.contrib.contenttypes',
+            'django.contrib.sessions',
+            'django.contrib.messages',
+            'django.contrib.staticfiles',
+            # Conditionally include an app
+            'debug_toolbar' if self.DEBUG else None,
+            'import_export',
+            'rest_framework',
+            'rest_framework.authtoken',
+            "corsheaders",
+            "django_webhook",
+            'allauth',
+            'allauth.account',
+            'allauth.socialaccount',
+            'prayer_room_api',
+        ]))
+
+    def MIDDLEWARE(self):
+        return list(filter(None, [
+            'django.middleware.security.SecurityMiddleware',
+            'django.contrib.sessions.middleware.SessionMiddleware',
+            'django.middleware.common.CommonMiddleware',
+            'django.middleware.csrf.CsrfViewMiddleware',
+            'django.contrib.auth.middleware.AuthenticationMiddleware',
+            'django.contrib.messages.middleware.MessageMiddleware',
+            'django.middleware.clickjacking.XFrameOptionsMiddleware',
+            "allauth.account.middleware.AccountMiddleware",
+            'whitenoise.middleware.WhiteNoiseMiddleware' if not self.DEBUG else False,
+            # Conditionally include a middleware
+            'debug_toolbar.middleware.DebugToolbarMiddleware' if self.DEBUG else False,
+        ]))
+
+    # Parse the URL into a database config dict.
+    DEFAULT_DATABASE = env.dburl('sqlite:///db.sqlite')
+
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:4000",
+    ]
+
+    def DATABASES(self):
+        return {
+            'default': self.DEFAULT_DATABASE,
+        }
+
+
+class ProdSettings(Settings):
+    # Override
+    DEBUG = False
+
+    # Values that *must* be provided in the environment.
+    STATIC_ROOT = env(env.Required)
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+    CORS_ALLOWED_ORIGINS = [
+        "https://api.prayer.thec3.uk"
+    ]
+
+    ALLOWED_HOSTS = [
+        "api.prayer.thec3.uk"
+    ]
+
+# The `use` method will find the right sub-class of ``BaseSettings`` to use
+# Based on the value of the `DJANGO_MODE` env var.
+__getattr__, __dir__ = Settings.use()

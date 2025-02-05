@@ -337,6 +337,22 @@ socialaccount = ["pyjwt[crypto] (>=1.7)", "requests (>=2.0.0)", "requests-oauthl
 steam = ["python3-openid (>=3.0.8)"]
 
 [[package]]
+name = "django-classy-settings"
+version = "3.0.7"
+description = "Simple class-based settings for Django"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "django_classy_settings-3.0.7-py3-none-any.whl", hash = "sha256:c2021f1bcebb9770047867eba003ae8ce280f46cf6a27a75cff8f8635ad64b85"},
+]
+
+[package.dependencies]
+django = "*"
+
+[package.extras]
+dev = ["Sphinx", "build", "coverage", "pytest", "ruff"]
+
+[[package]]
 name = "django-cors-headers"
 version = "4.6.0"
 description = "django-cors-headers is a Django application for handling the server headers required for Cross-Origin Resource Sharing (CORS)."
@@ -699,4 +715,4 @@ brotli = ["brotli"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.13"
-content-hash = "c296e9d1244bf7af816ee0b60b8b5d425f599c341b7893610f4dec00a02ad186"
+content-hash = "28ecbdf391038a9e41a1d47eaf1f112f1ebce98af087dcc19b123bcb990cb95f"
