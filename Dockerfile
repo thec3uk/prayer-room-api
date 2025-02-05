@@ -24,12 +24,11 @@ RUN addgroup --system django \
 # Requirements are installed here to ensure they will be cached.
 RUN pipx ensurepath
 RUN pipx install poetry==2.0.0
-RUN pipx ensurepath
-RUN ls /root/.local/bin
-RUN echo $PATH
+# RUN ls /root/.local/bin
+# RUN echo $PATH
 COPY ./poetry.lock /poetry.lock
 COPY ./pyproject.toml /pyproject.toml
-RUN poetry install
+RUN pipx ensurepath && poetry install
 # RUN pip install -r /requirements.txt
 
 # Copy project code
