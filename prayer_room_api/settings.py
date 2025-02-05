@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     "corsheaders",
     "django_webhook",
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     'prayer_room_api',
 ]
 
@@ -54,6 +57,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'prayer_room_api.urls'
@@ -123,6 +128,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -137,5 +144,3 @@ CORS_ALLOWED_ORIGINS = [
 
 
 DJANGO_WEBHOOK = dict(MODELS=["prayer_room_api.PrayerPraiseRequest", "prayer_room_api.Setting"])
-
-# CELERY_BROKER_URL = "amqp://guest:guest@localhost:5672//"
