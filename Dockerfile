@@ -25,6 +25,8 @@ RUN addgroup --system django \
 RUN pipx ensurepath
 RUN pipx install poetry==2.0.0
 RUN pipx ensurepath
+RUN ls /root/.local/bin
+RUN echo $PATH
 COPY ./poetry.lock /poetry.lock
 COPY ./pyproject.toml /pyproject.toml
 RUN poetry install
