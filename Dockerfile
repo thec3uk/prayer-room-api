@@ -29,14 +29,14 @@ RUN pipx install poetry==2.0.0
 COPY ./poetry.lock /poetry.lock
 COPY ./pyproject.toml /pyproject.toml
 COPY ./README.md /README.md
-RUN /root/.local/bin/poetry install --no-root --no-directory
+RUN /root/.local/bin/poetry install --only main --no-root --no-directory
 # RUN pip install -r /requirements.txt
 
 # Copy project code
 COPY . .
-RUN /root/.local/bin/poetry install
+RUN /root/.local/bin/poetry install --only main
 
-RUN /root/.local/bin/poetry run python manage.py collectstatic --noinput --clear
+RUN DJANGO_MODE=prod /root/.local/bin/poetry run python manage.py collectstatic --noinput --clear
 
 # Run as non-root user
 RUN chown -R django:django /app
