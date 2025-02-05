@@ -42,5 +42,9 @@ RUN STATIC_ROOT=/static DJANGO_MODE=prod /root/.local/bin/poetry run python mana
 RUN chown -R django:django /app
 USER django
 
+RUN which django-admin
+RUN which celery
+RUN which gunicorn
+
 # Run application
 CMD gunicorn prayer_room_api.wsgi:application
