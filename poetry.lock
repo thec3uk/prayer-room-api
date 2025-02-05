@@ -368,6 +368,21 @@ asgiref = ">=3.6"
 django = ">=4.2"
 
 [[package]]
+name = "django-debug-toolbar"
+version = "5.0.1"
+description = "A configurable set of panels that display various debug information about the current request/response."
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "django_debug_toolbar-5.0.1-py3-none-any.whl", hash = "sha256:7456cc2e951db37dab335686db7803c4a0ecb6736d120705f6668db9548bf49f"},
+    {file = "django_debug_toolbar-5.0.1.tar.gz", hash = "sha256:296f6f18a80710e84fbb8361538ae5ec522a75ebe9ab67db34bcf1026cbeb420"},
+]
+
+[package.dependencies]
+django = ">=4.2.9"
+sqlparse = ">=0.2"
+
+[[package]]
 name = "django-import-export"
 version = "4.3.4"
 description = "Django application and library for importing and exporting data with included admin integration."
@@ -715,4 +730,4 @@ brotli = ["brotli"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.13"
-content-hash = "28ecbdf391038a9e41a1d47eaf1f112f1ebce98af087dcc19b123bcb990cb95f"
+content-hash = "2946c96d54f9dc6f9874fa348033d46dafb6dc6cbcf882be82c9d2e784b0ed60"
