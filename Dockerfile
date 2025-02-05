@@ -28,6 +28,7 @@ RUN pipx install poetry==2.0.0
 # RUN echo $PATH
 COPY ./poetry.lock /poetry.lock
 COPY ./pyproject.toml /pyproject.toml
+COPY ./README.md /README.md
 RUN /root/.local/bin/poetry install
 # RUN pip install -r /requirements.txt
 
