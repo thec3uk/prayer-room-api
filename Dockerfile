@@ -21,6 +21,7 @@ RUN addgroup --system django \
     && adduser --system --ingroup django django
 
 # Requirements are installed here to ensure they will be cached.
+RUN pipx install poetry==2.0.0
 COPY ./poetry.lock /poetry.lock
 COPY ./pyproject.toml /pyproject.toml
 RUN poetry install
