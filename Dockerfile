@@ -29,6 +29,7 @@ RUN pipx install poetry==2.0.0
 COPY ./poetry.lock /poetry.lock
 COPY ./pyproject.toml /pyproject.toml
 COPY ./README.md /README.md
+RUN /root/.local/bin/poetry config virtualenvs.in-project true
 RUN /root/.local/bin/poetry install --only main --no-root --no-directory
 # RUN pip install -r /requirements.txt
 
