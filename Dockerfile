@@ -29,11 +29,12 @@ RUN pipx install poetry==2.0.0
 COPY ./poetry.lock /poetry.lock
 COPY ./pyproject.toml /pyproject.toml
 COPY ./README.md /README.md
-RUN /root/.local/bin/poetry install
+RUN /root/.local/bin/poetry install --no-root --no-directory
 # RUN pip install -r /requirements.txt
 
 # Copy project code
 COPY . .
+RUN /root/.local/bin/poetry install
 
 RUN python manage.py collectstatic --noinput --clear
 
