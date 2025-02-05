@@ -15,6 +15,7 @@ RUN apt-get update --yes --quiet && apt-get install --yes --quiet --no-install-r
     libjpeg62-turbo-dev \
     zlib1g-dev \
     libwebp-dev \
+    pipx \
     && rm -rf /var/lib/apt/lists/*
 
 RUN addgroup --system django \
