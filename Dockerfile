@@ -43,4 +43,4 @@ RUN chown -R django:django /app
 USER django
 
 # Run application
-CMD /root/.local/bin/poetry run gunicorn prayer_room_api.wsgi:application
+CMD gunicorn prayer_room_api.wsgi:application
