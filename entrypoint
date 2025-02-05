@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+set -eux
+
+cd /app
+
+./manage.py migrate
+
+exec "$@"
