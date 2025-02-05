@@ -4,6 +4,10 @@ set -eux
 
 cd /app
 
+eval $(poetry env activate)
+
 ./manage.py migrate
+
+
 
 exec "$@"
