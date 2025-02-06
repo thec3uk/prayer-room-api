@@ -26,7 +26,7 @@ class PrayerPraiseRequest(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     type = models.CharField(choices=PrayerType, default=PrayerType.PRAYER, max_length=20)
 
-    name = models.CharField(max_length=255)
+    name = models.TextField()
     content = models.TextField()
 
     prayer_count = models.IntegerField(default=0)
