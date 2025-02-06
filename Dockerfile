@@ -1,12 +1,14 @@
-FROM python:3.13-slim-bookworm
+FROM python:3.13-slim-bookworm as base
 
-WORKDIR /app
+
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
     DJANGO_SETTINGS_MODULE=prayer_room_api.settings \
     PORT=8000 \
-    WEB_CONCURRENCY=3
+    WEB_CONCURRENCY=3 \
+    VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH"
 
 # Install system packages required by Wagtail and Django.
 RUN apt-get update --yes --quiet && apt-get install --yes --quiet --no-install-recommends \
@@ -21,18 +23,25 @@ RUN apt-get update --yes --quiet && apt-get install --yes --quiet --no-install-r
 RUN addgroup --system django \
     && adduser --system --ingroup django django
 
+FROM base as builder
+
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
+
+WORKDIR /app
+
 # Requirements are installed here to ensure they will be cached.
 RUN pipx ensurepath
 RUN pipx install poetry==2.0.0
-# RUN ls /root/.local/bin
-# RUN echo $PATH
-COPY ./poetry.lock /poetry.lock
-COPY ./pyproject.toml /pyproject.toml
-COPY ./README.md /README.md
-COPY ./entrypoint /entrypoint
-RUN /root/.local/bin/poetry config virtualenvs.in-project true
+
+COPY entrypoint README.md pyproject.toml poetry.lock ./
 RUN /root/.local/bin/poetry install --only main --no-root --no-directory
-# RUN pip install -r /requirements.txt
+
+FROM base as runtime
+
+COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 # Copy project code
 COPY . .
