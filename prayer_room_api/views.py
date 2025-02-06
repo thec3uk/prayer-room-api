@@ -40,6 +40,11 @@ class PrayerPraiseRequestViewSet(ModelViewSet):
             return []
         return super().get_authenticators()
 
+    def get_permissions(self):
+        if self.request.method == 'OPTIONS':
+            return []
+        return super().get_permissions()
+
     def get_queryset(self):
         qst = super().get_queryset()
         location = self.request.query_params.get('location')
