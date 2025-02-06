@@ -156,6 +156,7 @@ class ProdSettings(Settings):
     CORS_ALLOWED_ORIGINS = [
         "https://prayer.thec3.uk"
     ]
+    CORS_ALLOW_CREDENTIALS = True
 
     ALLOWED_HOSTS = [
         "api.prayer.thec3.uk"
