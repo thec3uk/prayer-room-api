@@ -4,12 +4,7 @@ set -eux
 
 cd /app
 
-eval $(poetry env activate)
 export DJANGO_MODE=prod
-# export STATIC_ROOT=/app/static_root
-
 ./manage.py collectstatic --noinput --clear
-
-
 
 exec "$@"

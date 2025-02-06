@@ -46,9 +46,6 @@ COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 WORKDIR /app
 # Copy project code
 COPY . .
-# RUN /root/.local/bin/poetry install --only main
-
-# RUN STATIC_ROOT=/static DJANGO_MODE=prod /root/.local/bin/poetry run python manage.py collectstatic --noinput --clear
 
 # Run as non-root user
 RUN chown -R django:django /app
