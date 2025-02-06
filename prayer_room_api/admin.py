@@ -26,7 +26,12 @@ class PrayerPraiseRequestAdmin(ImportMixin, admin.ModelAdmin):
     list_display = ('id', 'name', 'content', 'prayer_count', 'type', 'location', 'is_flagged', 'is_archived')
     list_filter = ('type','location', 'created_at', 'flagged_at', 'archived_at')
     resource_classes = [PrayerRequestResource]
-    actions = ['archive_prayer']
+    actions = ['archive_prayer', 'unflag_prayer']
+
+    @admin.action(description="Clear the flags on the selected prayers")
+    def unflag_prayer(self, request, queryset):
+        updated = queryset.update(flagged_at=None, archived_at=None)
+        self.message_user(request, f"{updated} prayers were unflagged.", messages.SUCCESS)
 
     @admin.action(description="Mark selected prayers as archived")
     def archive_prayer(self, request, queryset):
