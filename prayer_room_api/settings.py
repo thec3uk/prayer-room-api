@@ -119,6 +119,7 @@ class Settings(BaseSettings):
         return list(filter(None, [
             'django.middleware.security.SecurityMiddleware',
             'django.contrib.sessions.middleware.SessionMiddleware',
+            "corsheaders.middleware.CorsMiddleware",
             'django.middleware.common.CommonMiddleware',
             'django.middleware.csrf.CsrfViewMiddleware',
             'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -156,17 +157,10 @@ class ProdSettings(Settings):
     CORS_ALLOWED_ORIGINS = [
         "https://prayer.thec3.uk"
     ]
-    CORS_ALLOW_CREDENTIALS = True
 
     ALLOWED_HOSTS = [
         "api.prayer.thec3.uk"
     ] + [f'172.17.0.{num}' for num in range(2,255)]
-    from corsheaders.defaults import default_headers
-
-    CORS_ALLOW_HEADERS = (
-        *default_headers,
-        "origin",
-    )
 
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
