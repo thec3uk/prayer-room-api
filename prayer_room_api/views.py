@@ -35,6 +35,11 @@ class PrayerPraiseRequestViewSet(ModelViewSet):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get_authenticators(self):
+        if self.method == 'OPTIONS':
+            return []
+        return super().get_authenticators()
+
     def get_queryset(self):
         qst = super().get_queryset()
         location = self.request.query_params.get('location')
