@@ -154,7 +154,7 @@ class ProdSettings(Settings):
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
     CORS_ALLOWED_ORIGINS = [
-        "https://api.prayer.thec3.uk"
+        "https://prayer.thec3.uk"
     ]
 
     ALLOWED_HOSTS = [
