@@ -23,9 +23,17 @@ class HomePageContentSerializer(serializers.ModelSerializer):
         )
 
 
-class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
+class LocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Location
+        fields = (
+            'name',
+            'slug',
+            'id'
+        )
 
-    # location = serializers.SlugRelatedField(queryset=Location.objects.all(), slug_field='name')
+
+class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
     location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
     is_flagged = serializers.SerializerMethodField()
     is_archived = serializers.SerializerMethodField()
@@ -52,17 +60,7 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
 
 
 class PrayerPraiseRequestWebhookSerializer(PrayerPraiseRequestSerializer):
-    location = serializers.SlugRelatedField(queryset=Location.objects.all(), slug_field='name')
-
-
-class LocationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Location
-        fields = (
-            'name',
-            'slug',
-            'id'
-        )
+    location = LocationSerializer()
 
 
 class SettingSerializer(serializers.ModelSerializer):
