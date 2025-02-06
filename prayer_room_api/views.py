@@ -36,7 +36,7 @@ class PrayerPraiseRequestViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_authenticators(self):
-        if self.method == 'OPTIONS':
+        if self.request.method == 'OPTIONS':
             return []
         return super().get_authenticators()
 
