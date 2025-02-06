@@ -161,6 +161,8 @@ class ProdSettings(Settings):
         "api.prayer.thec3.uk"
     ] + [f'172.17.0.{num}' for num in range(2,255)]
 
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTOCOL", "https")
+
 # The `use` method will find the right sub-class of ``BaseSettings`` to use
 # Based on the value of the `DJANGO_MODE` env var.
 __getattr__, __dir__ = Settings.use()
