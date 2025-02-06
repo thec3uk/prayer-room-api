@@ -43,6 +43,7 @@ FROM base as runtime
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
+WORKDIR /app
 # Copy project code
 COPY . .
 # RUN /root/.local/bin/poetry install --only main

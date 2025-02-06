@@ -4,8 +4,6 @@ set -eux
 
 cd /app
 
-ls -la
-
 eval $(poetry env activate)
 export DJANGO_MODE=prod
 export STATIC_ROOT=/static
