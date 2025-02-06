@@ -17,8 +17,6 @@ from cbs import BaseSettings, env
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = []
-
 ROOT_URLCONF = 'prayer_room_api.urls'
 
 TEMPLATES = [
@@ -138,6 +136,8 @@ class Settings(BaseSettings):
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:4000",
     ]
+
+    ALLOWED_HOSTS = []
 
     def DATABASES(self):
         return {
