@@ -168,8 +168,8 @@ class Settings(BaseSettings):
             "APP": {
                 "provider_id": "churchsuite",
                 "name": "Churchsuite",
-                "client_id": CHURCHSUITE_CLIENT_ID,
-                "secret": CHURCHSUITE_CLIENT_SECRET,
+                "client_id": str(CHURCHSUITE_CLIENT_ID),
+                "secret": str(CHURCHSUITE_CLIENT_SECRET),
                 "key": "thec3",
             }
         }
