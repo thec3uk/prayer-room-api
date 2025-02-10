@@ -50,6 +50,7 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
             "location",
             "is_flagged",
             "is_archived",
+            "created_at",
         )
 
     def get_is_flagged(self, obj):

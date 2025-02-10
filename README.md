@@ -14,7 +14,8 @@
 
 ## Doing
 
-
+* prayers showing incorrect times
+* name is required?
 
 ## Done
 
