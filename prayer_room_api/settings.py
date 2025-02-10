@@ -14,6 +14,10 @@ from pathlib import Path
 
 from cbs import BaseSettings, env
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -155,25 +159,29 @@ class Settings(BaseSettings):
             'default': self.DEFAULT_DATABASE,
         }
 
-    CHURCHSUITE_CLIENT_ID = env(env.Required)
-    CHURCHSUITE_CLIENT_SECRET = env(env.Required)
 
     SOCIALACCOUNT_STORE_TOKENS = True
     ACCOUNT_EMAIL_REQUIRED = True
     SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
     ACCOUNT_AUTHENTICATION_METHOD = 'email'
     SOCIALACCOUNT_ADAPTER = 'prayer_room_api.adapters.SocialAccountAdapter'
-    SOCIALACCOUNT_PROVIDERS = {
-        "churchsuite": {
-            "APP": {
-                "provider_id": "churchsuite",
-                "name": "Churchsuite",
-                "client_id": str(CHURCHSUITE_CLIENT_ID),
-                "secret": str(CHURCHSUITE_CLIENT_SECRET),
-                "key": "thec3",
+    def SOCIALACCOUNT_PROVIDERS(self):
+        import os
+        CHURCHSUITE_CLIENT_ID = os.environ['CHURCHSUITE_CLIENT_ID']
+        CHURCHSUITE_CLIENT_SECRET = os.environ['CHURCHSUITE_CLIENT_SECRET']
+        return {
+            "churchsuite": {
+                "APP": {
+                    "provider_id": "churchsuite",
+                    "name": "Churchsuite",
+                    "client_id": CHURCHSUITE_CLIENT_ID,
+                    "secret": CHURCHSUITE_CLIENT_SECRET,
+                    "key": "thec3",
+                }
             }
-        }
-    }
+       }
+       # SOCIALACCOUNT_PROVIDERS['churchsuite']['APP']['client_id'] = CHURCHSUITE_CLIENT_ID
+       # SOCIALACCOUNT_PROVIDERS['churchsuite']['APP']['secret'] = CHURCHSUITE_CLIENT_SECRET
 
 
 

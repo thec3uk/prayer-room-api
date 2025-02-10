@@ -20,6 +20,7 @@ whitenoise = "^6.8.2"
 psycopg = "^3.2.4"
 django-classy-settings = "^3.0.7"
 neopolitan = "^0.1.41"
+python-dotenv = "^1.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
