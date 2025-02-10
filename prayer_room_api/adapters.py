@@ -14,15 +14,16 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def is_open_for_signup(self, request: HttpRequest, sociallogin: Any):
         return getattr(settings, "ACCOUNT_ALLOW_REGISTRATION", True)
 
-    def pre_social_login(self, request: HttpRequest, sociallogin: Any):
+
+    def save_user(self, request, sociallogin, form=None):
+        user = super().save_user(request, sociallogin, form)
         if sociallogin.account.provider != "churchsuite":
-            return
+            return user
 
         moderator_tags = [tag for tag in sociallogin.account.extra_data.get('tags') if tag['id'] in MODERATOR_TAG_IDS]
 
         print(all(moderator_tags))
         if all(moderator_tags):
-            sociallogin.account.user.is_staff = True
-            sociallogin.account.user.save()
+            user.is_staff = True
             group, created = Group.objects.get_or_create(name='Staff')
-            group.user_set.add(sociallogin.account.user)
+            group.user_set.add(user)
