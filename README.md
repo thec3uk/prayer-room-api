@@ -2,28 +2,19 @@
 
 ## To do
 
+* migrate to uv tooling
 * Prayer wall pagination
 * custom admin views - neopolitan?
   * group for access
   - actions to mark archived (bulk, indivdual)
-* Create infra & deploy
-
-
-
+- Github actions
+- import the historic prayers
+* 404 & 500 handler
+* Sentry
 
 ## Doing
 
-* sigin with cs
-  - allauth
 
-* Zapier
-  * Webhooks incoming
-  * Webhooks outgoing
-  * Existing Zaps
-    * Flagged prayer (OUT)
-    * New submission (OUT)
-    * Discord to AirTable (prayer/praise) (IN)
-    * Airtable to Discord (OUT)
 
 ## Done
 
@@ -41,3 +32,15 @@
   * API Pagination for prayers - how does the client work?
 * Prayer request
   * Ordering
+* Create infra & deploy
+* Production role out.
+  - setup the new webhooks
+    - update zapier hooks
+    - test them
+
+* Zapier
+  * Webhooks incoming
+  * Webhooks outgoing
+  * Existing Zaps
+    * New submission (OUT)
+* sigin with cs

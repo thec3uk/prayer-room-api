@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
+from debug_toolbar.toolbar import debug_toolbar_urls
 from .views import PrayerInspirationModelViewSet, PrayerPraiseRequestViewSet, HomePageContentModelViewSet, LocationModelViewSet, SettingModelViewSet
 
 router = SimpleRouter()
@@ -29,5 +30,6 @@ router.register(r'settings', SettingModelViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls))
-]
+    path('api/', include(router.urls)),
+    path('auth/', include('allauth.urls')),
+] + debug_toolbar_urls()

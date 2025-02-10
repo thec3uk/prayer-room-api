@@ -22,7 +22,9 @@ ROOT_URLCONF = 'prayer_room_api.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            str(BASE_DIR / 'prayer_room_api' / "templates")
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -82,6 +84,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DJANGO_WEBHOOK = dict(MODELS=["prayer_room_api.PrayerPraiseRequest", "prayer_room_api.Setting"])
 
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
 class Settings(BaseSettings):
 
     # Allow production to override the secret key, but fall-back to something consistent.
@@ -112,6 +119,7 @@ class Settings(BaseSettings):
             'allauth',
             'allauth.account',
             'allauth.socialaccount',
+            'socialaccount.providers.churchsuite',
             'prayer_room_api',
         ]))
 
@@ -140,10 +148,34 @@ class Settings(BaseSettings):
 
     ALLOWED_HOSTS = []
 
+    INTERNAL_IPS = ['localhost', '127.0.0.1']
+
     def DATABASES(self):
         return {
             'default': self.DEFAULT_DATABASE,
         }
+
+    CHURCHSUITE_CLIENT_ID = env(env.Required)
+    CHURCHSUITE_CLIENT_SECRET = env(env.Required)
+
+    SOCIALACCOUNT_STORE_TOKENS = True
+    ACCOUNT_EMAIL_REQUIRED = True
+    SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+    ACCOUNT_AUTHENTICATION_METHOD = 'email'
+    SOCIALACCOUNT_ADAPTER = 'prayer_room_api.adapters.SocialAccountAdapter'
+    SOCIALACCOUNT_PROVIDERS = {
+        "churchsuite": {
+            "APP": {
+                "provider_id": "churchsuite",
+                "name": "Churchsuite",
+                "client_id": CHURCHSUITE_CLIENT_ID,
+                "secret": CHURCHSUITE_CLIENT_SECRET,
+                "key": "thec3",
+            }
+        }
+    }
+
+
 
 
 class ProdSettings(Settings):
