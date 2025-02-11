@@ -25,5 +25,6 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         print(all(moderator_tags))
         if all(moderator_tags):
             user.is_staff = True
+            user.save()
             group, created = Group.objects.get_or_create(name='Staff')
             group.user_set.add(user)
