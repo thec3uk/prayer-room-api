@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import PrayerInspiration, PrayerPraiseRequest, HomePageContent, Location, Setting
+from xmlrpc.client import DateTime
 
 
 
@@ -38,6 +39,7 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
     is_flagged = serializers.SerializerMethodField()
     is_archived = serializers.SerializerMethodField()
     prayer_count = serializers.IntegerField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = PrayerPraiseRequest

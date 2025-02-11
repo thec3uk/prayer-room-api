@@ -5,7 +5,6 @@
 * migrate to uv tooling
 * Prayer wall pagination
 * custom admin views - neopolitan?
-  * group for access
   - actions to mark archived (bulk, indivdual)
 - Github actions
 - import the historic prayers
@@ -14,8 +13,7 @@
 
 ## Doing
 
-* prayers showing incorrect times
-* name is required?
+* location radio buttons
 
 ## Done
 
