@@ -28,6 +28,7 @@ class PrayerPraiseRequest(models.Model):
 
     name = models.TextField(default='Anon')
     content = models.TextField()
+    response_comment = models.TextField(blank=True, default="")
 
     prayer_count = models.IntegerField(default=0)
 

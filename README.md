@@ -2,14 +2,15 @@
 
 ## To do
 
+* 404 & 500 handler
 * migrate to uv tooling
-* Prayer wall pagination
+- Github actions
+* Sentry
+
 * custom admin views - neopolitan?
   - actions to mark archived (bulk, indivdual)
-- Github actions
+* Prayer wall pagination
 - import the historic prayers
-* 404 & 500 handler
-* Sentry
 
 ## Doing
 

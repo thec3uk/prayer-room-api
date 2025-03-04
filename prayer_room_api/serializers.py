@@ -48,6 +48,7 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
             "type",
             "name",
             "content",
+            "response_comment",
             "prayer_count",
             "location",
             "is_flagged",
