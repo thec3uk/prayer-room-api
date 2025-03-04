@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 from cbs import BaseSettings, env
 from dotenv import load_dotenv
@@ -93,6 +94,26 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+
+if SENTRY_DSN:
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        # Add data like request headers and IP for users,
+        # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+        send_default_pii=True,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for tracing.
+        traces_sample_rate=1.0,
+        _experiments={
+            # Set continuous_profiling_auto_start to True
+            # to automatically start the profiler on when
+            # possible.
+            "continuous_profiling_auto_start": True,
+        },
+    )
+
 
 class Settings(BaseSettings):
 
@@ -167,7 +188,7 @@ class Settings(BaseSettings):
     ACCOUNT_LOGIN_METHODS = {'email'}
     SOCIALACCOUNT_ADAPTER = 'prayer_room_api.adapters.SocialAccountAdapter'
     def SOCIALACCOUNT_PROVIDERS(self):
-        import os
+
         CHURCHSUITE_CLIENT_ID = os.environ['CHURCHSUITE_CLIENT_ID']
         CHURCHSUITE_CLIENT_SECRET = os.environ['CHURCHSUITE_CLIENT_SECRET']
         return {
@@ -209,23 +230,3 @@ class ProdSettings(Settings):
 # The `use` method will find the right sub-class of ``BaseSettings`` to use
 # Based on the value of the `DJANGO_MODE` env var.
 __getattr__, __dir__ = Settings.use()
-
-if ProdSettings.DEBUG:
-
-    SENTRY_DSN = env(env.Required)
-
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        # Add data like request headers and IP for users,
-        # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
-        send_default_pii=True,
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for tracing.
-        traces_sample_rate=1.0,
-        _experiments={
-            # Set continuous_profiling_auto_start to True
-            # to automatically start the profiler on when
-            # possible.
-            "continuous_profiling_auto_start": True,
-        },
-    )
