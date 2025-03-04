@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-from re import DEBUG
 
 from cbs import BaseSettings, env
 from dotenv import load_dotenv
@@ -211,7 +210,7 @@ class ProdSettings(Settings):
 # Based on the value of the `DJANGO_MODE` env var.
 __getattr__, __dir__ = Settings.use()
 
-if not Settings.DEBUG:
+if ProdSettings.DEBUG:
 
     SENTRY_DSN = env(env.Required)
 
