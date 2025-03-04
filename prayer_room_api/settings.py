@@ -11,10 +11,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from re import DEBUG
 
 from cbs import BaseSettings, env
-
 from dotenv import load_dotenv
+import sentry_sdk
 
 load_dotenv()
 
@@ -92,6 +93,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
 
 class Settings(BaseSettings):
 
@@ -208,3 +210,23 @@ class ProdSettings(Settings):
 # The `use` method will find the right sub-class of ``BaseSettings`` to use
 # Based on the value of the `DJANGO_MODE` env var.
 __getattr__, __dir__ = Settings.use()
+
+if not Settings.DEBUG:
+
+    SENTRY_DSN = env(env.Required)
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        # Add data like request headers and IP for users,
+        # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+        send_default_pii=True,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for tracing.
+        traces_sample_rate=1.0,
+        _experiments={
+            # Set continuous_profiling_auto_start to True
+            # to automatically start the profiler on when
+            # possible.
+            "continuous_profiling_auto_start": True,
+        },
+    )

@@ -29,10 +29,15 @@ router.register(r'locations', LocationModelViewSet)
 router.register(r'settings', SettingModelViewSet)
 
 
+def trigger_error(request):
+    division_by_zero = 1 / 0
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('auth/', include('allauth.urls')),
+    path('sentry-debug/', trigger_error),
 ]
 
 if settings.DEBUG:
