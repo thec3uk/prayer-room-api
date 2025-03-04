@@ -165,7 +165,7 @@ class Settings(BaseSettings):
     SOCIALACCOUNT_STORE_TOKENS = True
     ACCOUNT_EMAIL_REQUIRED = True
     SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
-    ACCOUNT_AUTHENTICATION_METHOD = 'email'
+    ACCOUNT_LOGIN_METHODS = {'email'}
     SOCIALACCOUNT_ADAPTER = 'prayer_room_api.adapters.SocialAccountAdapter'
     def SOCIALACCOUNT_PROVIDERS(self):
         import os
