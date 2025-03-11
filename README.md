@@ -2,11 +2,10 @@
 
 ## To do
 
-* 404 & 500 handler
-* migrate to uv tooling
-- Github actions
-* Sentry
 
+* migrate to uv tooling
+
+* 404 & 500 handler
 * custom admin views - neopolitan?
   - actions to mark archived (bulk, indivdual)
 * Prayer wall pagination
@@ -44,3 +43,5 @@
   * Existing Zaps
     * New submission (OUT)
 * sigin with cs
+* Sentry
+- Github actions
