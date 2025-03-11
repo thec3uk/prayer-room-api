@@ -144,6 +144,7 @@ class Settings(BaseSettings):
             "django_webhook",
             'allauth',
             'allauth.account',
+            'allauth.headless',
             'allauth.socialaccount',
             'socialaccount.providers.churchsuite',
             'prayer_room_api',
@@ -205,7 +206,20 @@ class Settings(BaseSettings):
        # SOCIALACCOUNT_PROVIDERS['churchsuite']['APP']['client_id'] = CHURCHSUITE_CLIENT_ID
        # SOCIALACCOUNT_PROVIDERS['churchsuite']['APP']['secret'] = CHURCHSUITE_CLIENT_SECRET
 
-
+    def HEADLESS_FRONTEND_URLS(self):
+        return {
+            "account_confirm_email": "https://app.project.org/account/verify-email/{key}",
+            # Key placeholders are automatically populated. You are free to adjust this
+            # to your own needs, e.g.
+            #
+            # "https://app.project.org/account/email/verify-email?token={key}",
+            "account_reset_password": "https://app.project.org/account/password/reset",
+            "account_reset_password_from_key": "https://app.project.org/account/password/reset/key/{key}",
+            "account_signup": "https://app.project.org/account/signup",
+            # Fallback in case the state containing the `next` URL is lost and the handshake
+            # with the third-party provider fails.
+            "socialaccount_login_error": "https://app.project.org/account/provider/callback",
+        }
 
 
 class ProdSettings(Settings):
@@ -226,6 +240,13 @@ class ProdSettings(Settings):
 
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     CELERY_BROKER_URL = env(env.Required, key='RABBITMQ_URL')
+
+    def HEADLESS_FRONTEND_URLS(self):
+        return {
+            "account_confirm_email": "https://app.project.org/account/verify-email/{key}",
+            "account_reset_password_from_key": "https://app.org/account/password/reset/key/{key}",
+            "account_signup": "https://app.org/account/signup",
+        }
 
 # The `use` method will find the right sub-class of ``BaseSettings`` to use
 # Based on the value of the `DJANGO_MODE` env var.
