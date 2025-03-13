@@ -1,4 +1,8 @@
+## Setup
 
+This Django project is currently setup using a normal virtualenv running python 3.13. Dependencies are managed via poetry, but I would like to move to uv.
+
+Deployment is handled automatically via Github Actions to a server running dokku
 
 ## To do
 
