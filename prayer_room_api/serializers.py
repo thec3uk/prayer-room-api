@@ -36,6 +36,7 @@ class LocationSerializer(serializers.ModelSerializer):
 
 class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
     location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
+    location_name = serializers.SlugRelatedField(source='location', slug_field='name', read_only=True)
     is_flagged = serializers.SerializerMethodField()
     is_archived = serializers.SerializerMethodField()
     prayer_count = serializers.IntegerField(read_only=True)
@@ -51,6 +52,7 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
             "response_comment",
             "prayer_count",
             "location",
+            "location_name",
             "is_flagged",
             "is_archived",
             "created_at",
