@@ -30,7 +30,7 @@ class LocationModelViewSet(ReadOnlyModelViewSet):
 
 
 class PrayerPraiseRequestViewSet(ModelViewSet):
-    queryset = PrayerPraiseRequest.objects.filter(archived_at__isnull=True, flagged_at__isnull=True).order_by('-created_at')
+    queryset = PrayerPraiseRequest.objects.select_related('location').filter(archived_at__isnull=True, flagged_at__isnull=True).order_by('-created_at')
     serializer_class = PrayerPraiseRequestSerializer
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]

@@ -10,6 +10,8 @@
   - actions to mark archived (bulk, indivdual)
 * Prayer wall pagination
 - import the historic prayers
+- API for archiving a prayer - admin's using the frontend instead of custom backends
+- Storing the notification toggle for a user.
 
 ## Doing
 
