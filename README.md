@@ -16,10 +16,16 @@ Deployment is handled automatically via Github Actions to a server running dokku
 - import the historic prayers
 - API for archiving a prayer - admin's using the frontend instead of custom backends
 - Storing the notification toggle for a user.
+- Digest API for all Users
+  - email
+  - Subject
+  - Content
+- User Profile? or Custom Fields in CS?
+  2 boolean fields either way
 
 ## Doing
 
-* location radio buttons
+* location radio buttons are broken
 
 ## Done
 
