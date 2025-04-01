@@ -6,20 +6,19 @@ Deployment is handled automatically via Github Actions to a server running dokku
 
 ## To do
 
-
+* Drop disallowed host warning to Sentry
 * migrate to uv tooling
-
 * 404 & 500 handler
 * custom admin views - neopolitan?
   - actions to mark archived (bulk, indivdual)
 * Prayer wall pagination
 - import the historic prayers
-- API for archiving a prayer - admin's using the frontend instead of custom backends
-- Storing the notification toggle for a user.
+
 - Digest API for all Users
   - email
   - Subject
   - Content
+- Storing the notification toggle for a user.
 - User Profile? or Custom Fields in CS?
   2 boolean fields either way
 
