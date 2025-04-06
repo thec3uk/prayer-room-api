@@ -113,6 +113,9 @@ if SENTRY_DSN:
             "continuous_profiling_auto_start": True,
         },
     )
+    from sentry_sdk.integrations.logging import ignore_logger
+
+    ignore_logger("django.security.DisallowedHost")
 
 LOGGING = {
     "version": 1,
