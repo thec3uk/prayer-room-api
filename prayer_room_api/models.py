@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.timezone import now
 
@@ -20,19 +21,24 @@ class Location(models.Model):
 
 class PrayerPraiseRequest(models.Model):
     class PrayerType(models.TextChoices):
-        PRAYER = 'prayer', "Prayer"
-        PRAISE = 'praise', "Praise"
+        PRAYER = "prayer", "Prayer"
+        PRAISE = "praise", "Praise"
+
     created_at = models.DateTimeField(auto_now_add=False)
     updated_at = models.DateTimeField(auto_now=True)
-    type = models.CharField(choices=PrayerType, default=PrayerType.PRAYER, max_length=20)
+    type = models.CharField(
+        choices=PrayerType, default=PrayerType.PRAYER, max_length=20
+    )
 
-    name = models.TextField(default='Anon')
+    name = models.TextField(default="Anon")
     content = models.TextField()
     response_comment = models.TextField(blank=True, default="")
 
     prayer_count = models.IntegerField(default=0)
 
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='prayer_requests')
+    location = models.ForeignKey(
+        Location, on_delete=models.CASCADE, related_name="prayer_requests"
+    )
 
     flagged_at = models.DateTimeField(null=True, blank=True)
     archived_at = models.DateTimeField(null=True, blank=True)
@@ -59,3 +65,9 @@ class Setting(models.Model):
     name = models.CharField(max_length=255)
     is_enabled = models.BooleanField(default=True)
     button_text = models.CharField(max_length=255)
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    enable_digest_notifications = models.BooleanField(default=False)
+    enable_repsonse_notifications = models.BooleanField(default=False)
