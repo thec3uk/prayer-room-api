@@ -192,6 +192,7 @@ class Settings(BaseSettings):
                     "allauth.headless",
                     "allauth.socialaccount",
                     "socialaccount.providers.churchsuite",
+                    "django_extensions",
                     "prayer_room_api",
                 ],
             )
