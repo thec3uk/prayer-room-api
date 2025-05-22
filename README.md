@@ -4,9 +4,51 @@ This Django project is currently setup using a normal virtualenv running python 
 
 Deployment is handled automatically via Github Actions to a server running dokku
 
+### Development setup
+
+#### Django
+
+I have added a [justfile](https://just.systems/man/en/) to make it easier to get started from a development standpoint.
+
+To get started for the first time (follow the prompts):
+
+```sh
+just init
+just manage createsuperuser
+just dev
+```
+
+Then coming back again it's just
+
+```sh
+just dev
+```
+
+There is also `just manage` as simple wrapper for running `manage.py` commands
+
+#### Remix
+
+The Remix app is installed as follows:
+
+```sh
+npm dev
+```
+
+It does require the following `.env` file:
+
+```
+AIRTABLE_PAT=<obtained from django>
+API_URL=http://localhost:8001/api
+```
+
+To get the token visit [here](http://127.0.0.1:8001/admin/authtoken/tokenproxy/) and add a new token, then copy the key into the `.env` file
+
+## Contributions
+
+Please open a PR with your changes to allow a review to happen. Deployments will happen automatically once the PR is merged.
+
 ## To do
 
-* Drop disallowed host warning to Sentry
 * migrate to uv tooling
 * 404 & 500 handler
 * custom admin views - neopolitan?
@@ -18,9 +60,6 @@ Deployment is handled automatically via Github Actions to a server running dokku
   - email
   - Subject
   - Content
-- Storing the notification toggle for a user.
-- User Profile? or Custom Fields in CS?
-  2 boolean fields either way
 
 ## Doing
 
@@ -28,6 +67,7 @@ Deployment is handled automatically via Github Actions to a server running dokku
 
 ## Done
 
+* Drop disallowed host warning to Sentry
 * Create Models
 * Add Django import export
 * Import data - dev
@@ -56,3 +96,6 @@ Deployment is handled automatically via Github Actions to a server running dokku
 * sigin with cs
 * Sentry
 - Github actions
+- Storing the notification toggle for a user.
+- User Profile? or Custom Fields in CS?
+  2 boolean fields either way
