@@ -19,14 +19,20 @@ from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 from django.conf import settings
 
-from .views import PrayerInspirationModelViewSet, PrayerPraiseRequestViewSet, HomePageContentModelViewSet, LocationModelViewSet, SettingModelViewSet
+from .views import (
+    PrayerInspirationModelViewSet,
+    PrayerPraiseRequestViewSet,
+    HomePageContentModelViewSet,
+    LocationModelViewSet,
+    SettingModelViewSet,
+)
 
 router = SimpleRouter()
-router.register(r'prayer-inspiration', PrayerInspirationModelViewSet)
-router.register(r'content', HomePageContentModelViewSet)
-router.register(r'prayer-requests', PrayerPraiseRequestViewSet)
-router.register(r'locations', LocationModelViewSet)
-router.register(r'settings', SettingModelViewSet)
+router.register(r"prayer-inspiration", PrayerInspirationModelViewSet)
+router.register(r"content", HomePageContentModelViewSet)
+router.register(r"prayer-requests", PrayerPraiseRequestViewSet)
+router.register(r"locations", LocationModelViewSet)
+router.register(r"settings", SettingModelViewSet)
 
 
 def trigger_error(request):
@@ -34,13 +40,14 @@ def trigger_error(request):
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
-    path('auth/', include('allauth.urls')),
+    path("admin/", admin.site.urls),
+    path("api/", include(router.urls)),
+    path("auth/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
-    path('sentry-debug/', trigger_error),
+    path("sentry-debug/", trigger_error),
 ]
 
 if settings.DEBUG is True:
     from debug_toolbar.toolbar import debug_toolbar_urls
+
     urlpatterns += debug_toolbar_urls()

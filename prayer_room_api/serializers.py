@@ -4,7 +4,6 @@ from .models import PrayerInspiration, PrayerPraiseRequest, HomePageContent, Loc
 from xmlrpc.client import DateTime
 
 
-
 class PrayerInspirationSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -13,6 +12,7 @@ class PrayerInspirationSerializer(serializers.ModelSerializer):
             "verse",
             "content",
         )
+
 
 class HomePageContentSerializer(serializers.ModelSerializer):
 
@@ -27,16 +27,14 @@ class HomePageContentSerializer(serializers.ModelSerializer):
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = (
-            'name',
-            'slug',
-            'id'
-        )
+        fields = ("name", "slug", "id")
 
 
 class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
     location = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
-    location_name = serializers.SlugRelatedField(source='location', slug_field='name', read_only=True)
+    location_name = serializers.SlugRelatedField(
+        source="location", slug_field="name", read_only=True
+    )
     is_flagged = serializers.SerializerMethodField()
     is_archived = serializers.SerializerMethodField()
     prayer_count = serializers.IntegerField(read_only=True)
@@ -45,7 +43,7 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = PrayerPraiseRequest
         fields = (
-            'id',
+            "id",
             "type",
             "name",
             "content",
@@ -72,8 +70,4 @@ class PrayerPraiseRequestWebhookSerializer(PrayerPraiseRequestSerializer):
 class SettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Setting
-        fields = (
-            'name',
-            'is_enabled',
-            'button_text'
-        )
+        fields = ("name", "is_enabled", "button_text")
