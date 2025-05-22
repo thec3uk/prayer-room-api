@@ -14,6 +14,7 @@ To get started for the first time (follow the prompts):
 
 ```sh
 just init
+source .venv/bin/activate  # this doesn't work in justfile
 just manage createsuperuser
 just dev
 ```
@@ -21,6 +22,7 @@ just dev
 Then coming back again it's just
 
 ```sh
+source .venv/bin/activate
 just dev
 ```
 
