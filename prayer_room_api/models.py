@@ -71,3 +71,4 @@ class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     enable_digest_notifications = models.BooleanField(default=False)
     enable_repsonse_notifications = models.BooleanField(default=False)
+    churchsuite_contact_id = models.CharField(max_length=100, blank=True, null=True)
