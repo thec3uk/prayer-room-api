@@ -6,12 +6,20 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import F
 from django.utils.timezone import now
 
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from allauth.socialaccount.models import SocialToken
+import requests
+
+
 from .models import (
     PrayerInspiration,
     PrayerPraiseRequest,
     HomePageContent,
     Location,
     Setting,
+    UserProfile,
 )
 from .serializers import (
     PrayerInspirationSerializer,
@@ -19,6 +27,7 @@ from .serializers import (
     PrayerPraiseRequestSerializer,
     LocationSerializer,
     SettingSerializer,
+    UserProfileSerializer,
 )
 
 
@@ -76,3 +85,53 @@ class PrayerPraiseRequestViewSet(ModelViewSet):
         return Response({"flagged_at": bool(prayer.flagged_at)})
 
 
+
+
+class UserProfileViewSet(ReadOnlyModelViewSet):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return UserProfile.objects.filter(user=self.request.user)
+    
+
+class UpdatePreferencesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        profile = user.userprofile
+
+        profile.enable_digest_notifications = request.data.get("digest", False)
+        profile.enable_response_notifications = request.data.get("response", False)
+        profile.save()
+
+        try:
+            token = SocialToken.objects.get(account__user=user, account__provider='churchsuite')
+        except SocialToken.DoesNotExist:
+            return Response({"error": "No ChurchSuite token found"}, status=400)
+
+        contact_id = profile.churchsuite_contact_id
+        if not contact_id:
+            return Response({"error": "No ChurchSuite contact ID found"}, status=400)
+
+        headers = {
+            "X-Auth": token.token,
+            "X-Account": "thec3",
+            "X-Application": "Prayer Room",
+        }
+
+        payload = {
+            "receive_email": "1" if profile.enable_digest_notifications else "0",
+        }
+
+        res = requests.post(
+            f"https://api.churchsuite.com/addressbook/v1/contacts/{contact_id}",
+            headers=headers,
+            data=payload
+        )
+
+        if res.status_code != 200:
+            return Response({"error": f"ChurchSuite error: {res.text}"}, status=500)
+
+        return Response({"status": "Preferences updated successfully"})

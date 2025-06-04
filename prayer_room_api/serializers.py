@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
-from .models import PrayerInspiration, PrayerPraiseRequest, HomePageContent, Location, Setting
+from .models import PrayerInspiration, PrayerPraiseRequest, HomePageContent, Location, Setting, UserProfile
 from xmlrpc.client import DateTime
-
 
 class PrayerInspirationSerializer(serializers.ModelSerializer):
 
@@ -71,3 +70,9 @@ class SettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Setting
         fields = ("name", "is_enabled", "button_text")
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['user', 'enable_digest_notifications', 'enable_repsonse_notifications']
