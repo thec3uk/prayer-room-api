@@ -45,7 +45,7 @@ class LocationModelViewSet(ReadOnlyModelViewSet):
 class PrayerPraiseRequestViewSet(ModelViewSet):
     queryset = (
         PrayerPraiseRequest.objects.select_related("location")
-        .filter(archived_at__isnull=True, flagged_at__isnull=True)
+        .filter(archived_at__isnull=True)
         .order_by("-created_at")
     )
     serializer_class = PrayerPraiseRequestSerializer
@@ -74,5 +74,3 @@ class PrayerPraiseRequestViewSet(ModelViewSet):
         prayer.save()
         prayer.refresh_from_db()
         return Response({"flagged_at": bool(prayer.flagged_at)})
-
-
