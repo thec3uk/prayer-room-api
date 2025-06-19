@@ -39,12 +39,12 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             group.users.add(user)
             # user.
 
-        print("USER HERE")
+        # print("USER HERE")
         
-        contact_id = sociallogin.account.extra_data.get("id")
-        if contact_id:
-            user_profile.churchsuite_contact_id = contact_id
-            user_profile.save()
+        # contact_id = sociallogin.account.extra_data.get("id")
+        # if contact_id:
+        #     user_profile.churchsuite_contact_id = contact_id
+        #     user_profile.save()
 
         # UserProfile.objects.get_or_create(user=user)
         # user_profile, _ = UserProfile.objects.get_or_create(user=user)
