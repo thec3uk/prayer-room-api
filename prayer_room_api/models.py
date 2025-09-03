@@ -71,3 +71,17 @@ class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     enable_digest_notifications = models.BooleanField(default=False)
     enable_repsonse_notifications = models.BooleanField(default=False)
+
+
+class BannedWord(models.Model):
+    class AutoActionChoices(models.TextChoices):
+        flag = "flag", "Flag Request"
+        archive = "archive", "Archive Request"
+
+    word = models.TextField()
+    auto_action = models.CharField(
+        max_length=255,
+        choices=AutoActionChoices.choices,
+        default=AutoActionChoices.flag,
+    )
+    is_active = models.BooleanField(default=True)

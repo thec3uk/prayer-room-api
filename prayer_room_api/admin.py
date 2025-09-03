@@ -9,6 +9,7 @@ from .models import (
     Location,
     Setting,
     UserProfile,
+    BannedWord,
 )
 from .resources import PrayerRequestResource
 
@@ -85,3 +86,9 @@ class PrayerPraiseRequestAdmin(ImportMixin, admin.ModelAdmin):
 class SettingsAdmin(ImportMixin, admin.ModelAdmin):
     list_display = ("id", "name", "button_text", "is_enabled")
     list_editable = ("name", "button_text", "is_enabled")
+
+
+@admin.register(BannedWord)
+class BannedWordAdmin(admin.ModelAdmin):
+    list_display = ("word", "auto_action", "is_active")
+    list_editable = ("auto_action", "is_active")
