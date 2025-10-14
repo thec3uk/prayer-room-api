@@ -34,7 +34,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             user.is_staff = True
             user.save()
             group, created = Group.objects.get_or_create(name="Staff")
-            group.users.add(user)
+            group.user_set.add(user)
             # user.
 
         print("USER HERE")
