@@ -284,6 +284,31 @@ class Settings(BaseSettings):
         }
 
 
+class StagingSettings(Settings):
+    # Override
+    DEBUG = False
+
+    # Values that *must* be provided in the environment.
+    STATIC_ROOT = env(env.Required)
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+    CORS_ALLOWED_ORIGINS = ["https://staging-prayer-room-api.dokku.thec3.uk"]
+
+    ALLOWED_HOSTS = ["staging-prayer-room-api.dokku.thec3.uk"] + [
+        f"172.17.0.{num}" for num in range(2, 255)
+    ]
+
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    CELERY_BROKER_URL = env(env.Required, key="RABBITMQ_URL")
+
+    def HEADLESS_FRONTEND_URLS(self):
+        return {
+            "account_confirm_email": "https://app.project.org/account/verify-email/{key}",
+            "account_reset_password_from_key": "https://app.org/account/password/reset/key/{key}",
+            "account_signup": "https://app.org/account/signup",
+        }
+
+
 class ProdSettings(Settings):
     # Override
     DEBUG = False
