@@ -4,7 +4,6 @@ set -eux
 
 cd /app
 
-export DJANGO_MODE=prod
-./manage.py collectstatic --noinput --clear
+DJANGO_MODE=prod ./manage.py collectstatic --noinput --clear
 
 exec "$@"
