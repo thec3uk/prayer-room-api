@@ -10,12 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
 
+import sentry_sdk
 from cbs import BaseSettings, env
 from dotenv import load_dotenv
-import sentry_sdk
 
 load_dotenv()
 
@@ -85,7 +85,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 DJANGO_WEBHOOK = dict(
-    MODELS=["prayer_room_api.PrayerPraiseRequest", "prayer_room_api.Setting"]
+    # MODELS=["prayer_room_api.PrayerPraiseRequest", "prayer_room_api.Setting"]
+    MODELS=["prayer_room_api.Setting"]
 )
 
 
@@ -193,6 +194,9 @@ class Settings(BaseSettings):
                     "allauth.socialaccount",
                     "socialaccount.providers.churchsuite",
                     "django_extensions",
+                    "django_htmx",
+                    "neapolitan",
+                    "django_filters",
                     "prayer_room_api",
                 ],
             )
@@ -212,6 +216,7 @@ class Settings(BaseSettings):
                     "django.contrib.messages.middleware.MessageMiddleware",
                     "django.middleware.clickjacking.XFrameOptionsMiddleware",
                     "allauth.account.middleware.AccountMiddleware",
+                    "django_htmx.middleware.HtmxMiddleware",
                     (
                         "whitenoise.middleware.WhiteNoiseMiddleware"
                         if not self.DEBUG

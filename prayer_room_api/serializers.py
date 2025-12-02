@@ -3,10 +3,10 @@ from rest_framework import serializers
 
 from .models import (
     BannedWord,
-    PrayerInspiration,
-    PrayerPraiseRequest,
     HomePageContent,
     Location,
+    PrayerInspiration,
+    PrayerPraiseRequest,
     Setting,
 )
 
@@ -71,23 +71,25 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
     def get_is_archived(self, obj):
         return bool(obj.archived_at)
 
+    def _auto_action(self, choice, text):
+        queryset = BannedWord.objects.filter(o_action=choice).values_list(
+            "word", flat=True
+        )
+        if any(word.lower() in text for word in queryset):
+            return timezone.now()
+        return None
+
     def validate(self, attrs):
-        banned_archive_words = BannedWord.objects.filter(
-            auto_action=BannedWord.AutoActionChoices.archive
-        ).values_list("word", flat=True)
-
         text_lower = attrs["content"].lower()
-        if any(word.lower() in text_lower for word in banned_archive_words):
-
-            attrs["archived_at"] = timezone.now()
-
-        banned_flagged_words = BannedWord.objects.filter(
-            auto_action=BannedWord.AutoActionChoices.flag
-        ).values_list("word", flat=True)
-
-        if any(word.lower() in text_lower for word in banned_flagged_words):
-            attrs["flagged_at"] = timezone.now()
-
+        attrs["archived_at"] = self._auto_action(
+            BannedWord.AutoActionChoices.archive, text_lower
+        )
+        attrs["flagged_at"] = self._auto_action(
+            BannedWord.AutoActionChoices.flag, text_lower
+        )
+        attrs["approved_at"] = self._auto_action(
+            BannedWord.AutoActionChoices.approve, text_lower
+        )
         return attrs
 
 

@@ -24,6 +24,12 @@ class PrayerPraiseRequest(models.Model):
         PRAYER = "prayer", "Prayer"
         PRAISE = "praise", "Praise"
 
+    # class PrayerStatus(models.TextChoices):
+    #     PENDING = "prayer", "Prayer"
+    #     APPROVED = "praise", "Praise"
+    #     FLAGGED = "praise", "Praise"
+    #     ARCHIVED = "praise", "Praise"
+
     created_at = models.DateTimeField(auto_now_add=False)
     updated_at = models.DateTimeField(auto_now=True)
     type = models.CharField(
@@ -42,6 +48,7 @@ class PrayerPraiseRequest(models.Model):
 
     flagged_at = models.DateTimeField(null=True, blank=True)
     archived_at = models.DateTimeField(null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.name}: {self.content[:10]}"
@@ -77,6 +84,7 @@ class BannedWord(models.Model):
     class AutoActionChoices(models.TextChoices):
         flag = "flag", "Flag Request"
         archive = "archive", "Archive Request"
+        approve = "approve", "Approve Request"
 
     word = models.TextField()
     auto_action = models.CharField(
