@@ -1,0 +1,111 @@
+<p class="subtitle" id="subtitle">
+    {% if page_obj %}
+        {{ page_obj.paginator.count }} banned word{{ page_obj.paginator.count|pluralize }}
+        {% if search %} matching "{{ search }}"{% endif %}
+    {% else %}
+        No banned words
+    {% endif %}
+</p>
+
+{% if object_list %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>
+                <a href="?search={{ search }}&sort=word&order={% if sort == 'word' and order == 'asc' %}desc{% else %}asc{% endif %}"
+                   class="sort-link"
+                   hx-get="{% url 'bannedword-list' %}?search={{ search }}&sort=word&order={% if sort == 'word' and order == 'asc' %}desc{% else %}asc{% endif %}"
+                   hx-target="#bannedword-table"
+                   hx-swap="innerHTML"
+                   hx-push-url="true">
+                    Word
+                    {% if sort == 'word' %}
+                        <span class="sort-icon">{% if order == 'asc' %}▲{% else %}▼{% endif %}</span>
+                    {% endif %}
+                </a>
+            </th>
+            <th>
+                <a href="?search={{ search }}&sort=auto_action&order={% if sort == 'auto_action' and order == 'asc' %}desc{% else %}asc{% endif %}"
+                   class="sort-link"
+                   hx-get="{% url 'bannedword-list' %}?search={{ search }}&sort=auto_action&order={% if sort == 'auto_action' and order == 'asc' %}desc{% else %}asc{% endif %}"
+                   hx-target="#bannedword-table"
+                   hx-swap="innerHTML"
+                   hx-push-url="true">
+                    Action
+                    {% if sort == 'auto_action' %}
+                        <span class="sort-icon">{% if order == 'asc' %}▲{% else %}▼{% endif %}</span>
+                    {% endif %}
+                </a>
+            </th>
+            <th>Status</th>
+            <th>Matches</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for word in object_list %}
+        <tr>
+            <td><strong>{{ word.word }}</strong></td>
+            <td>
+                <span class="badge {% if word.auto_action == 'flag' %}badge-flag{% else %}badge-archive{% endif %}">
+                    {{ word.get_auto_action_display }}
+                </span>
+            </td>
+            <td>
+                <span class="badge {% if word.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                    {% if word.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+            </td>
+            <td>{{ word.match_count|default:0 }}</td>
+            <td class="actions">
+                <a href="{% url 'bannedword-update' word.pk %}" class="action-btn">Edit</a>
+                <a href="{% url 'bannedword-delete' word.pk %}" class="action-btn action-btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&search={{ search }}&sort={{ sort }}&order={{ order }}"
+           hx-get="{% url 'bannedword-list' %}?page={{ page_obj.previous_page_number }}&search={{ search }}&sort={{ sort }}&order={{ order }}"
+           hx-target="#bannedword-table"
+           hx-swap="innerHTML"
+           hx-push-url="true">Previous</a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+            <span class="current">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}&search={{ search }}&sort={{ sort }}&order={{ order }}"
+               hx-get="{% url 'bannedword-list' %}?page={{ num }}&search={{ search }}&sort={{ sort }}&order={{ order }}"
+               hx-target="#bannedword-table"
+               hx-swap="innerHTML"
+               hx-push-url="true">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&search={{ search }}&sort={{ sort }}&order={{ order }}"
+           hx-get="{% url 'bannedword-list' %}?page={{ page_obj.next_page_number }}&search={{ search }}&sort={{ sort }}&order={{ order }}"
+           hx-target="#bannedword-table"
+           hx-swap="innerHTML"
+           hx-push-url="true">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <h2>No banned words{% if search %} matching "{{ search }}"{% endif %}</h2>
+    {% if search %}
+        <p>Try a different search term.</p>
+    {% else %}
+        <p>Add your first banned word to start filtering prayer requests.</p>
+        <a href="{% url 'bannedword-create' %}" class="btn btn-primary" style="margin-top: 16px;">Add Banned Word</a>
+    {% endif %}
+</div>
+{% endif %}

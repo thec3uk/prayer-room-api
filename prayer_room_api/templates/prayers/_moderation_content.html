@@ -1,0 +1,87 @@
+<p class="subtitle">
+    {% if object_list %}
+        {{ object_list|length }} pending request{{ object_list|length|pluralize }}
+    {% else %}
+        No pending requests
+    {% endif %}
+</p>
+
+{% if object_list %}
+<div class="bulk-actions">
+    <div class="select-all-wrapper">
+        <input type="checkbox" id="select-all">
+        <label for="select-all">Select all</label>
+    </div>
+    <div class="bulk-buttons">
+        <button type="button" class="btn btn-approve btn-sm bulk-action-btn" data-action="bulk_approve" disabled>
+            Approve Selected
+        </button>
+        <button type="button" class="btn btn-deny btn-sm bulk-action-btn" data-action="bulk_deny" disabled>
+            Deny Selected
+        </button>
+    </div>
+    <span class="selected-count">0 selected</span>
+</div>
+
+<ul class="prayer-list">
+    {% for prayer in object_list %}
+    <li class="prayer-item" id="prayer-{{ prayer.id }}">
+        <div class="prayer-checkbox">
+            <input type="checkbox" name="prayer_ids" value="{{ prayer.id }}" class="prayer-select">
+        </div>
+        <div class="prayer-body">
+            <div class="prayer-header">
+                <div>
+                    <div class="prayer-name">{{ prayer.name }}</div>
+                    <div class="prayer-meta">
+                        <span class="badge badge-{{ prayer.type }}">{{ prayer.get_type_display }}</span>
+                        <span class="badge badge-location">{{ prayer.location.name }}</span>
+                    </div>
+                </div>
+                <div class="prayer-date">{{ prayer.created_at|date:"M d, Y" }}</div>
+            </div>
+
+            <div class="prayer-content">{{ prayer.content }}</div>
+
+            <div class="prayer-actions">
+                <button type="button" class="btn btn-approve"
+                    hx-post="{% url 'moderation' %}"
+                    hx-vals='{"prayer_id": "{{ prayer.id }}", "action": "approve"}'
+                    hx-target="#moderation-content"
+                    hx-swap="innerHTML swap:0.3s">
+                    Approve
+                </button>
+                <button type="button" class="btn btn-deny"
+                    hx-post="{% url 'moderation' %}"
+                    hx-vals='{"prayer_id": "{{ prayer.id }}", "action": "deny"}'
+                    hx-target="#moderation-content"
+                    hx-swap="innerHTML swap:0.3s">
+                    Deny
+                </button>
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+
+<div class="bulk-actions bulk-actions-bottom">
+    <div class="select-all-wrapper">
+        <input type="checkbox" id="select-all-bottom">
+        <label for="select-all-bottom">Select all</label>
+    </div>
+    <div class="bulk-buttons">
+        <button type="button" class="btn btn-approve btn-sm bulk-action-btn" data-action="bulk_approve" disabled>
+            Approve Selected
+        </button>
+        <button type="button" class="btn btn-deny btn-sm bulk-action-btn" data-action="bulk_deny" disabled>
+            Deny Selected
+        </button>
+    </div>
+    <span class="selected-count">0 selected</span>
+</div>
+{% else %}
+<div class="empty-state">
+    <h2>All caught up</h2>
+    <p>No prayer requests need moderation.</p>
+</div>
+{% endif %}

@@ -3,13 +3,13 @@ from django.utils.timezone import now
 from import_export.admin import ImportMixin
 
 from .models import (
-    PrayerPraiseRequest,
-    PrayerInspiration,
+    BannedWord,
     HomePageContent,
     Location,
+    PrayerInspiration,
+    PrayerPraiseRequest,
     Setting,
     UserProfile,
-    BannedWord,
 )
 from .resources import PrayerRequestResource
 
@@ -52,6 +52,7 @@ class PrayerPraiseRequestAdmin(ImportMixin, admin.ModelAdmin):
         "prayer_count",
         "type",
         "location",
+        "is_approved",
         "is_flagged",
         "is_archived",
     )
@@ -72,6 +73,10 @@ class PrayerPraiseRequestAdmin(ImportMixin, admin.ModelAdmin):
         self.message_user(
             request, f"{updated} prayers were archived.", messages.SUCCESS
         )
+
+    @admin.display(boolean=True)
+    def is_approved(self, obj):
+        return bool(obj.approved_at)
 
     @admin.display(boolean=True)
     def is_flagged(self, obj):
