@@ -85,8 +85,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 DJANGO_WEBHOOK = dict(
-    # MODELS=["prayer_room_api.PrayerPraiseRequest", "prayer_room_api.Setting"]
-    MODELS=["prayer_room_api.Setting"]
+    MODELS=["prayer_room_api.PrayerPraiseRequest", "prayer_room_api.Setting"]
+    # MODELS=["prayer_room_api.Setting"]
 )
 
 
