@@ -23,6 +23,7 @@ from rest_framework.routers import SimpleRouter
 
 from .views import (
     BannedWordCRUDView,
+    FlaggedView,
     HomePageContentModelViewSet,
     LocationModelViewSet,
     ModerationView,
@@ -47,6 +48,7 @@ urlpatterns = [
     path("", RedirectView.as_view(pattern_name="moderation"), name="home"),
     path("admin/", admin.site.urls),
     path("moderation/", ModerationView.as_view(), name="moderation"),
+    path("flagged/", FlaggedView.as_view(), name="flagged"),
     *BannedWordCRUDView.get_urls(),
     path("api/", include(router.urls)),
     path("auth/", include("allauth.urls")),

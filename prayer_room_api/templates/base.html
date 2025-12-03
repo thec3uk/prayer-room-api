@@ -27,7 +27,7 @@
         }
 
         .site-header-inner {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             display: flex;
             align-items: center;
@@ -95,7 +95,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 40px 20px;
         }
@@ -502,6 +502,7 @@
             <a href="{% url 'moderation' %}" class="site-title">Tim Creamer Prayer Room</a>
             <nav class="nav-links">
                 <a href="{% url 'moderation' %}" class="nav-link {% if request.resolver_match.url_name == 'moderation' %}active{% endif %}">Moderation</a>
+                <a href="{% url 'flagged' %}" class="nav-link {% if request.resolver_match.url_name == 'flagged' %}active{% endif %}">Flagged</a>
                 <a href="{% url 'bannedword-list' %}" class="nav-link {% if 'bannedword' in request.resolver_match.url_name %}active{% endif %}">Banned Words</a>
             </nav>
             <div class="header-spacer"></div>

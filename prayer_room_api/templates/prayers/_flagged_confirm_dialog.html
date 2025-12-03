@@ -1,0 +1,14 @@
+<div class="dialog-content">
+    <h2 class="dialog-title">{{ title }}</h2>
+    <p class="dialog-message">{{ message }}</p>
+    <div class="dialog-actions">
+        <button type="button" class="btn btn-archive" onclick="document.getElementById('confirm-dialog').close()">Cancel</button>
+        <button type="button" class="btn btn-unflag"
+            hx-post="{% url 'flagged' %}"
+            hx-vals='{"action": "{{ action }}", "prayer_ids": "{{ prayer_ids }}"}'
+            hx-target="#flagged-content"
+            hx-swap="innerHTML">
+            Confirm
+        </button>
+    </div>
+</div>
