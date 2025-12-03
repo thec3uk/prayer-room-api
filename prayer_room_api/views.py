@@ -55,7 +55,7 @@ class LocationModelViewSet(ReadOnlyModelViewSet):
 class PrayerPraiseRequestViewSet(ModelViewSet):
     queryset = (
         PrayerPraiseRequest.objects.select_related("location")
-        .filter(archived_at__isnull=True)
+        .filter(archived_at__isnull=True, approved_at__isnull=False)
         .order_by("-created_at")
     )
     serializer_class = PrayerPraiseRequestSerializer

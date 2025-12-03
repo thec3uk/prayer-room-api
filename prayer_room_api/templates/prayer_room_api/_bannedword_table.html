@@ -47,7 +47,7 @@
         <tr>
             <td><strong>{{ word.word }}</strong></td>
             <td>
-                <span class="badge {% if word.auto_action == 'flag' %}badge-flag{% else %}badge-archive{% endif %}">
+                <span class="badge {% if word.auto_action == 'flag' %}badge-flag{% elif word.auto_action == 'archive' %}badge-archive{% else %}badge-approve{% endif %}">
                     {{ word.get_auto_action_display }}
                 </span>
             </td>
