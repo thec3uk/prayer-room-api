@@ -44,6 +44,7 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
     )
     is_flagged = serializers.SerializerMethodField()
     is_archived = serializers.SerializerMethodField()
+    is_approved = serializers.SerializerMethodField()
     prayer_count = serializers.IntegerField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
 
@@ -60,9 +61,11 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
             "location_name",
             "is_flagged",
             "is_archived",
+            "is_approved",
             "created_at",
             "flagged_at",
             "archived_at",
+            "approved_at",
         )
 
     def get_is_flagged(self, obj):
@@ -70,6 +73,9 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
 
     def get_is_archived(self, obj):
         return bool(obj.archived_at)
+
+    def get_is_approved(self, obj):
+        return bool(obj.approved_at)
 
     def _auto_action(self, choice, text):
         queryset = BannedWord.objects.filter(o_action=choice).values_list(
