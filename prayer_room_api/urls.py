@@ -30,7 +30,9 @@ from .views import (
     PrayerInspirationModelViewSet,
     PrayerPraiseRequestViewSet,
     SettingModelViewSet,
+    UserProfileViewSet,
 )
+from .views import UpdatePreferencesView
 
 router = SimpleRouter()
 router.register(r"prayer-inspiration", PrayerInspirationModelViewSet)
@@ -38,6 +40,8 @@ router.register(r"content", HomePageContentModelViewSet)
 router.register(r"prayer-requests", PrayerPraiseRequestViewSet)
 router.register(r"locations", LocationModelViewSet)
 router.register(r"settings", SettingModelViewSet)
+router.register(r"user-profile", UserProfileViewSet, basename="user-profile")
+
 
 
 urlpatterns = [
@@ -49,6 +53,7 @@ urlpatterns = [
     path("api/", include(router.urls)),
     path("auth/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
+    path("api/preferences/update/", UpdatePreferencesView.as_view(), name="update-preferences"),
 ]
 
 if settings.DEBUG is True:

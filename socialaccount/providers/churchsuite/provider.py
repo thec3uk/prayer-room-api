@@ -17,6 +17,10 @@ class ChurchsuiteProvider(OAuth2Provider):
     account_class = ChurchsuiteAccount
     oauth2_adapter_class = ChurchsuiteOAuth2Adapter
 
+    @classmethod
+    def get_package(cls):
+        return "socialaccount.providers.churchsuite"
+
     def extract_uid(self, data):
         return str(data["id"])
 

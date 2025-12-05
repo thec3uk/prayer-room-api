@@ -11,7 +11,18 @@ from neapolitan.views import CRUDView
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics
+from django.db.models import F
+from django.utils.timezone import now
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from allauth.socialaccount.models import SocialToken
+import requests
+
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from .forms import BulkModerationForm, PrayerModerationForm
@@ -22,6 +33,7 @@ from .models import (
     PrayerInspiration,
     PrayerPraiseRequest,
     Setting,
+    UserProfile,
 )
 from .serializers import (
     HomePageContentSerializer,
@@ -29,6 +41,7 @@ from .serializers import (
     PrayerInspirationSerializer,
     PrayerPraiseRequestSerializer,
     SettingSerializer,
+    UserProfileSerializer,
 )
 
 
@@ -85,7 +98,69 @@ class PrayerPraiseRequestViewSet(ModelViewSet):
         prayer.refresh_from_db()
         return Response({"flagged_at": bool(prayer.flagged_at)})
 
+    @action(detail=True, methods=["post"])
+    def attach_to_user(self, request, pk=None):
+        prayer = self.get_object()
+        username = request.data.get("username")
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            if username:
+                # If user does not exist, create a new user
+                email=request.data.get("email","")
+                first_name= request.data.get("name", "")
+                user = User.objects.create_user(username,email,None,first_name=first_name)
 
+        if prayer.created_by is None:
+            prayer.created_by = user
+            prayer.save()
+            prayer.refresh_from_db()
+
+        return Response({"created_by": prayer.created_by.username})
+
+
+class UserProfileViewSet(ReadOnlyModelViewSet):
+    serializer_class = UserProfileSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=True, methods=["post"])
+    def user_profile(self, request, pk=None):
+        username = request.data.get("username")
+        try:
+            userprofile = UserProfile.objects.get(username=username)
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile not found"}, status=404)
+        
+        serializer = self.get_serializer(userprofile)
+        return Response(serializer.data)
+
+class UpdatePreferencesView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk=None):
+        username = request.data.get("username")
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            if username:
+                # If user does not exist, create a new user
+                email=request.data.get("email","")
+                first_name= request.data.get("name", "")
+                user = User.objects.create_user(username,email,None,first_name=first_name)
+
+        try:
+            profile = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            profile = UserProfile.objects.create(user=user)
+
+        profile.enable_digest_notifications = request.data.get("digestNotifications", False)
+        profile.enable_response_notifications = request.data.get("responseNotifications", False)
+        profile.save()
+
+        return Response({"status": "Preferences updated successfully"})
+      
 @method_decorator(staff_member_required, name="dispatch")
 class ModerationView(ListView):
     template_name = "prayers/moderation.html"

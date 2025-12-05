@@ -237,6 +237,7 @@ class Settings(BaseSettings):
 
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:4000",
+        "http://localhost:5173",
     ]
 
     ALLOWED_HOSTS = []

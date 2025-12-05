@@ -24,12 +24,9 @@ class PrayerPraiseRequest(models.Model):
         PRAYER = "prayer", "Prayer"
         PRAISE = "praise", "Praise"
 
-    # class PrayerStatus(models.TextChoices):
-    #     PENDING = "prayer", "Prayer"
-    #     APPROVED = "praise", "Praise"
-    #     FLAGGED = "praise", "Praise"
-    #     ARCHIVED = "praise", "Praise"
-
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, null=True, blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=False)
     updated_at = models.DateTimeField(auto_now=True)
     type = models.CharField(
@@ -77,7 +74,7 @@ class Setting(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     enable_digest_notifications = models.BooleanField(default=False)
-    enable_repsonse_notifications = models.BooleanField(default=False)
+    enable_response_notifications = models.BooleanField(default=False)
 
 
 class BannedWord(models.Model):
