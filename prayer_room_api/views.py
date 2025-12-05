@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import F, Q
+from django.db.models import Count, F, OuterRef, Q, Subquery
+from django.db.models.functions import Lower
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
@@ -413,6 +414,14 @@ class BannedWordCRUDView(CRUDView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+
+        # Annotate with match count using a subquery
+        match_count_subquery = PrayerPraiseRequest.objects.filter(
+            Q(flagged_at__isnull=False) | Q(archived_at__isnull=False),
+            content__icontains=Lower(OuterRef("word")),
+        ).values("pk")
+        queryset = queryset.annotate(match_count=Count(Subquery(match_count_subquery)))
+
         # Add search functionality
         search = self.request.GET.get("search", "").strip()
         if search:
@@ -436,12 +445,6 @@ class BannedWordCRUDView(CRUDView):
         context["search"] = self.request.GET.get("search", "")
         context["sort"] = self.request.GET.get("sort", "word")
         context["order"] = self.request.GET.get("order", "asc")
-
-        # Add match counts for list view
-        if hasattr(self, "object_list"):
-            for word in context.get("object_list", []):
-                word.match_count = self._get_match_count(word)
-
         return context
 
     def get_template_names(self):
@@ -449,14 +452,6 @@ class BannedWordCRUDView(CRUDView):
         if self.request.htmx and self.role.value == "list":
             return ["prayer_room_api/_bannedword_table.html"]
         return super().get_template_names()
-
-    def _get_match_count(self, banned_word):
-        """Calculate match count for a banned word dynamically."""
-        word_lower = banned_word.word.lower()
-        return PrayerPraiseRequest.objects.filter(
-            Q(flagged_at__isnull=False) | Q(archived_at__isnull=False),
-            content__icontains=word_lower,
-        ).count()
 
 
 # Define available context variables and example data for each template type
