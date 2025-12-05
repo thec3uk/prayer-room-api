@@ -4,8 +4,8 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, F, OuterRef, Q, Subquery
-from django.db.models.functions import Lower
+from django.db.models import Count, F, OuterRef, Q, Subquery, Value
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
@@ -415,12 +415,21 @@ class BannedWordCRUDView(CRUDView):
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        # Annotate with match count using a subquery
-        match_count_subquery = PrayerPraiseRequest.objects.filter(
-            Q(flagged_at__isnull=False) | Q(archived_at__isnull=False),
-            content__icontains=Lower(OuterRef("word")),
-        ).values("pk")
-        queryset = queryset.annotate(match_count=Count(Subquery(match_count_subquery)))
+        # Annotate with match count using a scalar subquery
+        # Note: __icontains is already case-insensitive, so no need for Lower()
+        match_count_subquery = (
+            PrayerPraiseRequest.objects.filter(
+                Q(flagged_at__isnull=False) | Q(archived_at__isnull=False),
+                content__icontains=OuterRef("word"),
+            )
+            .annotate(dummy=Value(1))
+            .values("dummy")
+            .annotate(count=Count("*"))
+            .values("count")
+        )
+        queryset = queryset.annotate(
+            match_count=Coalesce(Subquery(match_count_subquery), Value(0))
+        )
 
         # Add search functionality
         search = self.request.GET.get("search", "").strip()
