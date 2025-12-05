@@ -504,6 +504,7 @@
                 <a href="{% url 'moderation' %}" class="nav-link {% if request.resolver_match.url_name == 'moderation' %}active{% endif %}">Moderation</a>
                 <a href="{% url 'flagged' %}" class="nav-link {% if request.resolver_match.url_name == 'flagged' %}active{% endif %}">Flagged</a>
                 <a href="{% url 'bannedword-list' %}" class="nav-link {% if 'bannedword' in request.resolver_match.url_name %}active{% endif %}">Banned Words</a>
+                <a href="{% url 'emailtemplate-list' %}" class="nav-link {% if 'emailtemplate' in request.resolver_match.url_name %}active{% endif %}">Email Templates</a>
             </nav>
             <div class="header-spacer"></div>
             {% if user.is_authenticated %}

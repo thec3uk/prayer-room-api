@@ -90,3 +90,77 @@ class BannedWord(models.Model):
         default=AutoActionChoices.flag,
     )
     is_active = models.BooleanField(default=True)
+
+
+class EmailTemplate(models.Model):
+    """
+    Stores editable email templates for different notification types.
+    Uses Markdown for body content, rendered to HTML at send time.
+    Supports variable substitution using Django template syntax.
+    """
+
+    class TemplateType(models.TextChoices):
+        MODERATOR_DIGEST = "moderator_digest", "Moderator Digest (Hourly)"
+        USER_DIGEST = "user_digest", "User Digest (Daily/Weekly)"
+        RESPONSE_NOTIFICATION = (
+            "response_notification",
+            "Response Notification (Immediate)",
+        )
+
+    template_type = models.CharField(
+        max_length=50,
+        choices=TemplateType.choices,
+        unique=True,
+        help_text="Type of notification this template is used for",
+    )
+    subject = models.CharField(
+        max_length=200,
+        help_text="Email subject line with optional template variables",
+    )
+    body_markdown = models.TextField(
+        help_text="Email body in Markdown format. Supports Django template variables: {{ variable_name }}",
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Email Template"
+        verbose_name_plural = "Email Templates"
+
+    def __str__(self):
+        return self.get_template_type_display()
+
+
+class EmailLog(models.Model):
+    """Logs all sent emails for tracking and debugging."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        SENT = "sent", "Sent"
+        FAILED = "failed", "Failed"
+
+    template = models.ForeignKey(
+        EmailTemplate,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="logs",
+    )
+    recipient_email = models.EmailField()
+    subject = models.CharField(max_length=200)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+    error_message = models.TextField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Email Log"
+        verbose_name_plural = "Email Logs"
+
+    def __str__(self):
+        return f"{self.recipient_email} - {self.subject[:30]}"

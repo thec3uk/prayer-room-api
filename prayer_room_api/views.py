@@ -1,33 +1,30 @@
+import requests
+from allauth.socialaccount.models import SocialToken
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
+from django.views import View
 from django.views.generic import ListView
 from neapolitan.views import CRUDView
+from rest_framework import generics
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import generics
-from django.db.models import F
-from django.utils.timezone import now
-from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
-
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from allauth.socialaccount.models import SocialToken
-import requests
-
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from .forms import BulkModerationForm, PrayerModerationForm
+from .forms import BulkModerationForm, EmailTemplateForm, PrayerModerationForm
 from .models import (
     BannedWord,
+    EmailTemplate,
     HomePageContent,
     Location,
     PrayerInspiration,
@@ -107,9 +104,11 @@ class PrayerPraiseRequestViewSet(ModelViewSet):
         except User.DoesNotExist:
             if username:
                 # If user does not exist, create a new user
-                email=request.data.get("email","")
-                first_name= request.data.get("name", "")
-                user = User.objects.create_user(username,email,None,first_name=first_name)
+                email = request.data.get("email", "")
+                first_name = request.data.get("name", "")
+                user = User.objects.create_user(
+                    username, email, None, first_name=first_name
+                )
 
         if prayer.created_by is None:
             prayer.created_by = user
@@ -131,9 +130,10 @@ class UserProfileViewSet(ReadOnlyModelViewSet):
             userprofile = UserProfile.objects.get(username=username)
         except UserProfile.DoesNotExist:
             return Response({"error": "User profile not found"}, status=404)
-        
+
         serializer = self.get_serializer(userprofile)
         return Response(serializer.data)
+
 
 class UpdatePreferencesView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
@@ -146,21 +146,28 @@ class UpdatePreferencesView(APIView):
         except User.DoesNotExist:
             if username:
                 # If user does not exist, create a new user
-                email=request.data.get("email","")
-                first_name= request.data.get("name", "")
-                user = User.objects.create_user(username,email,None,first_name=first_name)
+                email = request.data.get("email", "")
+                first_name = request.data.get("name", "")
+                user = User.objects.create_user(
+                    username, email, None, first_name=first_name
+                )
 
         try:
             profile = UserProfile.objects.get(user=user)
         except UserProfile.DoesNotExist:
             profile = UserProfile.objects.create(user=user)
 
-        profile.enable_digest_notifications = request.data.get("digestNotifications", False)
-        profile.enable_response_notifications = request.data.get("responseNotifications", False)
+        profile.enable_digest_notifications = request.data.get(
+            "digestNotifications", False
+        )
+        profile.enable_response_notifications = request.data.get(
+            "responseNotifications", False
+        )
         profile.save()
 
         return Response({"status": "Preferences updated successfully"})
-      
+
+
 @method_decorator(staff_member_required, name="dispatch")
 class ModerationView(ListView):
     template_name = "prayers/moderation.html"
@@ -450,3 +457,102 @@ class BannedWordCRUDView(CRUDView):
             Q(flagged_at__isnull=False) | Q(archived_at__isnull=False),
             content__icontains=word_lower,
         ).count()
+
+
+# Define available context variables and example data for each template type
+TEMPLATE_CONTEXT_INFO = {
+    "moderator_digest": {
+        "description": "Hourly digest sent to staff with pending and flagged requests",
+        "variables": {
+            "recipient_name": "Name of the moderator receiving the email",
+            "pending_count": "Number of pending requests awaiting approval",
+            "flagged_count": "Number of flagged requests needing review",
+            "pending_requests": "List of pending request objects (use {% for req in pending_requests %})",
+            "flagged_requests": "List of flagged request objects",
+            "moderation_url": "URL to the moderation dashboard",
+        },
+        "example_data": {
+            "recipient_name": "John",
+            "pending_count": 5,
+            "flagged_count": 2,
+            "pending_requests": [],
+            "flagged_requests": [],
+            "moderation_url": "https://example.com/moderation/",
+        },
+    },
+    "user_digest": {
+        "description": "Daily/weekly digest sent to users with updates on their prayer requests",
+        "variables": {
+            "recipient_name": "Name of the user receiving the email",
+            "requests_with_responses": "List of user's requests that received responses",
+            "frequency": 'Either "daily" or "weekly"',
+        },
+        "example_data": {
+            "recipient_name": "Sarah",
+            "requests_with_responses": [],
+            "frequency": "daily",
+        },
+    },
+    "response_notification": {
+        "description": "Immediate notification when someone responds to a user's prayer request",
+        "variables": {
+            "recipient_name": "Name of the user who submitted the prayer request",
+            "request_content": "The original prayer request content (truncated)",
+            "response_text": "The response/comment that was added",
+        },
+        "example_data": {
+            "recipient_name": "Sarah",
+            "request_content": "Please pray for my upcoming job interview...",
+            "response_text": "Praying for you! May God give you peace and confidence.",
+        },
+    },
+}
+
+
+@method_decorator(staff_member_required, name="dispatch")
+class EmailTemplateCRUDView(CRUDView):
+    model = EmailTemplate
+    form_class = EmailTemplateForm
+    fields = ["template_type", "subject", "body_markdown", "is_active"]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if hasattr(self, "object") and self.object:
+            context["context_info"] = TEMPLATE_CONTEXT_INFO.get(
+                self.object.template_type, {}
+            )
+        context["all_context_info"] = TEMPLATE_CONTEXT_INFO
+        return context
+
+
+@method_decorator(staff_member_required, name="dispatch")
+class EmailTemplatePreviewView(View):
+    """HTMX endpoint for live template preview."""
+
+    def post(self, request, pk):
+        import markdown
+        from django.template import Context, Template
+
+        from .models import EmailTemplate
+
+        template = get_object_or_404(EmailTemplate, pk=pk)
+        context_info = TEMPLATE_CONTEXT_INFO.get(template.template_type, {})
+        example_data = context_info.get("example_data", {})
+
+        subject = request.POST.get("subject", "")
+        body_markdown = request.POST.get("body_markdown", "")
+
+        try:
+            subject_rendered = Template(subject).render(Context(example_data))
+            markdown_rendered = Template(body_markdown).render(Context(example_data))
+            html_content = markdown.markdown(markdown_rendered)
+
+            return HttpResponse(
+                f"""
+                <div class="preview-subject"><strong>Subject:</strong> {subject_rendered}</div>
+                <hr>
+                <div class="preview-body">{html_content}</div>
+            """
+            )
+        except Exception as e:
+            return HttpResponse(f'<div class="alert alert-danger">Error: {e}</div>')
