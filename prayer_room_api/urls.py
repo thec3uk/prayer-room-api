@@ -40,10 +40,6 @@ router.register(r"locations", LocationModelViewSet)
 router.register(r"settings", SettingModelViewSet)
 
 
-def trigger_error(request):
-    division_by_zero = 1 / 0
-
-
 urlpatterns = [
     path("", RedirectView.as_view(pattern_name="moderation"), name="home"),
     path("admin/", admin.site.urls),
@@ -53,7 +49,6 @@ urlpatterns = [
     path("api/", include(router.urls)),
     path("auth/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
-    path("sentry-debug/", trigger_error),
 ]
 
 if settings.DEBUG is True:
