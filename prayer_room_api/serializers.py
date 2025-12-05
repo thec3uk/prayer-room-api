@@ -11,6 +11,7 @@ from .models import (
     PrayerInspiration,
     PrayerPraiseRequest,
     Setting,
+    UserProfile,
 )
 
 class PrayerInspirationSerializer(serializers.ModelSerializer):
