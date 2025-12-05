@@ -1,0 +1,105 @@
+<p class="subtitle">
+    {% if paginator.count %}
+        {{ paginator.count }} flagged request{{ paginator.count|pluralize }}
+        {% if is_paginated %}(showing {{ page_obj.start_index }}-{{ page_obj.end_index }}){% endif %}
+    {% else %}
+        No flagged requests
+    {% endif %}
+</p>
+
+{% if object_list %}
+<div class="bulk-actions">
+    <div class="select-all-wrapper">
+        <input type="checkbox" id="select-all">
+        <label for="select-all">Select all</label>
+    </div>
+    <div class="bulk-buttons">
+        <button type="button" class="btn btn-unflag btn-sm bulk-action-btn" data-action="bulk_unflag" disabled>
+            Unflag Selected
+        </button>
+        <button type="button" class="btn btn-archive btn-sm bulk-action-btn" data-action="bulk_archive" disabled>
+            Archive Selected
+        </button>
+    </div>
+    <span class="selected-count">0 selected</span>
+</div>
+
+<ul class="prayer-list">
+    {% for prayer in object_list %}
+    <li class="prayer-item" id="prayer-{{ prayer.id }}">
+        <div class="prayer-checkbox">
+            <input type="checkbox" name="prayer_ids" value="{{ prayer.id }}" class="prayer-select">
+        </div>
+        <div class="prayer-body">
+            <div class="prayer-header">
+                <div>
+                    <div class="prayer-name">{{ prayer.name }}</div>
+                    <div class="prayer-meta">
+                        <span class="badge badge-{{ prayer.type }}">{{ prayer.get_type_display }}</span>
+                        <span class="badge badge-location">{{ prayer.location.name }}</span>
+                        <span class="badge badge-flagged">Flagged {{ prayer.flagged_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+                <div class="prayer-date">{{ prayer.created_at|date:"M d, Y" }}</div>
+            </div>
+
+            <div class="prayer-content">{{ prayer.content }}</div>
+
+            <div class="prayer-actions">
+                <button type="button" class="btn btn-unflag"
+                    hx-post="{% url 'flagged' %}"
+                    hx-vals='{"prayer_id": "{{ prayer.id }}", "action": "unflag"}'
+                    hx-target="#flagged-content"
+                    hx-swap="innerHTML swap:0.3s">
+                    Unflag
+                </button>
+                <button type="button" class="btn btn-archive"
+                    hx-post="{% url 'flagged' %}"
+                    hx-vals='{"prayer_id": "{{ prayer.id }}", "action": "archive"}'
+                    hx-target="#flagged-content"
+                    hx-swap="innerHTML swap:0.3s">
+                    Archive
+                </button>
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+
+<div class="bulk-actions bulk-actions-bottom">
+    <div class="select-all-wrapper">
+        <input type="checkbox" id="select-all-bottom">
+        <label for="select-all-bottom">Select all</label>
+    </div>
+    <div class="bulk-buttons">
+        <button type="button" class="btn btn-unflag btn-sm bulk-action-btn" data-action="bulk_unflag" disabled>
+            Unflag Selected
+        </button>
+        <button type="button" class="btn btn-archive btn-sm bulk-action-btn" data-action="bulk_archive" disabled>
+            Archive Selected
+        </button>
+    </div>
+    <span class="selected-count">0 selected</span>
+</div>
+
+{% if is_paginated %}
+<nav class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1" hx-get="{% url 'flagged' %}?page=1" hx-target="#flagged-content" hx-swap="innerHTML">&laquo; First</a>
+        <a href="?page={{ page_obj.previous_page_number }}" hx-get="{% url 'flagged' %}?page={{ page_obj.previous_page_number }}" hx-target="#flagged-content" hx-swap="innerHTML">Previous</a>
+    {% endif %}
+
+    <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" hx-get="{% url 'flagged' %}?page={{ page_obj.next_page_number }}" hx-target="#flagged-content" hx-swap="innerHTML">Next</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" hx-get="{% url 'flagged' %}?page={{ page_obj.paginator.num_pages }}" hx-target="#flagged-content" hx-swap="innerHTML">Last &raquo;</a>
+    {% endif %}
+</nav>
+{% endif %}
+{% else %}
+<div class="empty-state">
+    <h2>All clear</h2>
+    <p>No flagged prayer requests to review.</p>
+</div>
+{% endif %}

@@ -45,6 +45,7 @@ class PrayerPraiseRequest(models.Model):
 
     flagged_at = models.DateTimeField(null=True, blank=True)
     archived_at = models.DateTimeField(null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.name}: {self.content[:10]}"
@@ -74,3 +75,18 @@ class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     enable_digest_notifications = models.BooleanField(default=False)
     enable_response_notifications = models.BooleanField(default=False)
+
+
+class BannedWord(models.Model):
+    class AutoActionChoices(models.TextChoices):
+        flag = "flag", "Flag Request"
+        archive = "archive", "Archive Request"
+        approve = "approve", "Approve Request"
+
+    word = models.TextField()
+    auto_action = models.CharField(
+        max_length=255,
+        choices=AutoActionChoices.choices,
+        default=AutoActionChoices.flag,
+    )
+    is_active = models.BooleanField(default=True)

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Banned Word - Tim Creamer Prayer Room{% endblock %}
+
+{% block content %}
+<h1>{% if object %}Edit Banned Word{% else %}Add Banned Word{% endif %}</h1>
+<p class="subtitle">
+    {% if object %}
+        Editing "{{ object.word }}"
+    {% else %}
+        Create a new banned word to filter prayer requests
+    {% endif %}
+</p>
+
+<div style="background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 24px; max-width: 500px;">
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="id_word">Word or Phrase</label>
+            <input type="text" name="word" id="id_word" class="form-input"
+                   value="{{ form.word.value|default:'' }}"
+                   placeholder="Enter word or phrase to ban"
+                   required>
+            {% if form.word.errors %}
+                <p style="color: #dc2626; font-size: 0.875rem; margin-top: 4px;">{{ form.word.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_auto_action">Auto Action</label>
+            <select name="auto_action" id="id_auto_action" class="form-select">
+                <option value="flag" {% if form.auto_action.value == 'flag' %}selected{% endif %}>Flag Request</option>
+                <option value="archive" {% if form.auto_action.value == 'archive' %}selected{% endif %}>Archive Request</option>
+                <option value="approve" {% if form.auto_action.value == 'approve' %}selected{% endif %}>Approve Request</option>
+            </select>
+            <p style="color: #666; font-size: 0.75rem; margin-top: 4px;">
+                Flag: Marks for review. Archive: Automatically hides the request.
+            </p>
+        </div>
+
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" name="is_active" id="id_is_active" class="form-checkbox"
+                       {% if form.is_active.value %}checked{% endif %}>
+                Active
+            </label>
+            <p style="color: #666; font-size: 0.75rem; margin-top: 4px;">
+                Only active words will be checked against new prayer requests.
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" class="btn btn-primary">
+                {% if object %}Save Changes{% else %}Add Word{% endif %}
+            </button>
+            <a href="{% url 'bannedword-list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

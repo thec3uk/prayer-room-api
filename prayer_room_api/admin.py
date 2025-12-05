@@ -3,10 +3,11 @@ from django.utils.timezone import now
 from import_export.admin import ImportMixin
 
 from .models import (
-    PrayerPraiseRequest,
-    PrayerInspiration,
+    BannedWord,
     HomePageContent,
     Location,
+    PrayerInspiration,
+    PrayerPraiseRequest,
     Setting,
     UserProfile,
 )
@@ -58,6 +59,7 @@ class PrayerPraiseRequestAdmin(ImportMixin, admin.ModelAdmin):
         "prayer_count",
         "type",
         "location",
+        "is_approved",
         "is_flagged",
         "is_archived",
     )
@@ -80,6 +82,10 @@ class PrayerPraiseRequestAdmin(ImportMixin, admin.ModelAdmin):
         )
 
     @admin.display(boolean=True)
+    def is_approved(self, obj):
+        return bool(obj.approved_at)
+
+    @admin.display(boolean=True)
     def is_flagged(self, obj):
         return bool(obj.flagged_at)
 
@@ -92,3 +98,9 @@ class PrayerPraiseRequestAdmin(ImportMixin, admin.ModelAdmin):
 class SettingsAdmin(ImportMixin, admin.ModelAdmin):
     list_display = ("id", "name", "button_text", "is_enabled")
     list_editable = ("name", "button_text", "is_enabled")
+
+
+@admin.register(BannedWord)
+class BannedWordAdmin(admin.ModelAdmin):
+    list_display = ("word", "auto_action", "is_active")
+    list_editable = ("auto_action", "is_active")

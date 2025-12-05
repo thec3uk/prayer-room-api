@@ -1,0 +1,82 @@
+name: CI
+
+# Enable Buildkit and let compose use it to speed up image building
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+on:
+  pull_request:
+    branches: ["staging"]
+    paths-ignore: ["docs/**"]
+
+  push:
+    branches: ["staging"]
+    paths-ignore: ["docs/**"]
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  # linter:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Code Repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.13"
+  #     - name: Run pre-commit
+  #       uses: pre-commit/action@v3.0.1
+
+  # With no caching at all the entire ci process takes 3m to complete!
+  # pytest:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout Code Repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Build the Stack
+  #       run: docker compose -f docker-compose.local.yml build django
+
+  #     - name: Build the docs
+  #       run: docker compose -f docker-compose.docs.yml build docs
+
+  #     - name: Run DB Migrations
+  #       run: docker compose -f docker-compose.local.yml run --rm django python manage.py migrate
+
+  #     - name: Run Django Tests
+  #       run: docker compose -f docker-compose.local.yml run django pytest
+
+  #     - name: Tear down the Stack
+  #       run: docker compose -f docker-compose.local.yml down
+
+  deploy:
+    runs-on: ubuntu-22.04
+    # needs: [pytest, linter]
+    steps:
+      - name: Cloning repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: AWS Security Group Add IP
+        uses: sohelamin/aws-security-group-add-ip-action@v1.0.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_SECRET_KEY }}
+          aws-region: "eu-west-2"
+          aws-security-group-id: "sg-016ecaf83f73027d2"
+
+      - name: Push to dokku
+        uses: dokku/github-action@master
+        with:
+          git_remote_url: "ssh://dokku@dokku.thec3.uk:22/staging-prayer-room-api"
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          branch: "staging"
+          git_push_flags: "--force"
+          ssh_host_key: ${{ secrets.SSH_HOST_KEY }}

@@ -1,8 +1,17 @@
+from django.utils import timezone
 from rest_framework import serializers
 
-from .models import PrayerInspiration, PrayerPraiseRequest, HomePageContent, Location, Setting, UserProfile
+
 from django.contrib.auth.models import User
 from xmlrpc.client import DateTime
+from .models import (
+    BannedWord,
+    HomePageContent,
+    Location,
+    PrayerInspiration,
+    PrayerPraiseRequest,
+    Setting,
+)
 
 class PrayerInspirationSerializer(serializers.ModelSerializer):
 
@@ -37,6 +46,7 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
     )
     is_flagged = serializers.SerializerMethodField()
     is_archived = serializers.SerializerMethodField()
+    is_approved = serializers.SerializerMethodField()
     prayer_count = serializers.IntegerField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
 
@@ -53,7 +63,11 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
             "location_name",
             "is_flagged",
             "is_archived",
+            "is_approved",
             "created_at",
+            "flagged_at",
+            "archived_at",
+            "approved_at",
         )
 
     def get_is_flagged(self, obj):
@@ -77,6 +91,32 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
             validated_data['created_by'] = user
         # Leave blank if not provided / signed in    
         return super().create(validated_data)
+      
+    def get_is_approved(self, obj):
+        return bool(obj.approved_at)
+
+    def _auto_action(self, choice, text):
+        queryset = BannedWord.objects.filter(auto_action=choice).values_list(
+            "word", flat=True
+        )
+        if any(word.lower() in text for word in queryset):
+            return timezone.now()
+        return None
+
+    def validate(self, attrs):
+        text_lower = attrs["content"].lower()
+        attrs["archived_at"] = self._auto_action(
+            BannedWord.AutoActionChoices.archive, text_lower
+        )
+        attrs["flagged_at"] = self._auto_action(
+            BannedWord.AutoActionChoices.flag, text_lower
+        )
+        attrs["approved_at"] = self._auto_action(
+            BannedWord.AutoActionChoices.approve, text_lower
+        )
+        return attrs
+
+
 class PrayerPraiseRequestWebhookSerializer(PrayerPraiseRequestSerializer):
     location = LocationSerializer()
 

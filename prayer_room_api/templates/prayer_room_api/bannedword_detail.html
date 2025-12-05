@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}{{ object.word }} - Banned Words - Tim Creamer Prayer Room{% endblock %}
+
+{% block content %}
+<h1>Banned Word Details</h1>
+
+<div style="background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 24px; max-width: 500px;">
+    <div style="margin-bottom: 24px;">
+        <p style="font-size: 1.25rem; font-weight: 600; margin-bottom: 12px;">{{ object.word }}</p>
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <span class="badge {% if object.auto_action == 'flag' %}badge-flag{% else %}badge-archive{% endif %}">
+                {{ object.get_auto_action_display }}
+            </span>
+            <span class="badge {% if object.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                {% if object.is_active %}Active{% else %}Inactive{% endif %}
+            </span>
+        </div>
+        {% if object.match_count is not None %}
+        <p style="color: #666; font-size: 0.875rem;">
+            Matched {{ object.match_count }} prayer request{{ object.match_count|pluralize }}
+        </p>
+        {% endif %}
+    </div>
+
+    <div style="display: flex; gap: 12px;">
+        <a href="{% url 'bannedword-update' object.pk %}" class="btn btn-primary">Edit</a>
+        <a href="{% url 'bannedword-delete' object.pk %}" class="btn btn-danger">Delete</a>
+        <a href="{% url 'bannedword-list' %}" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+{% endblock %}
