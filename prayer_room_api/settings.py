@@ -165,7 +165,9 @@ class Settings(BaseSettings):
 
     # Email Configuration - Console backend for development
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-    DEFAULT_FROM_EMAIL = env("Prayer Room <noreply@thec3.uk>", key="DEFAULT_FROM_EMAIL")
+    DEFAULT_FROM_EMAIL = env(
+        "Tim Creamer Prayer Room <prayer@thec3.uk>", key="DEFAULT_FROM_EMAIL"
+    )
 
     # DEBUG defaults to True, but can be overridden by env var `DJANGO_DEBUG`
     DEBUG = env.bool(True, prefix="DJANGO_")
@@ -313,12 +315,14 @@ class ProdSettings(Settings):
 
     # Email Configuration - AWS SES via django-anymail
     EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
-    DEFAULT_FROM_EMAIL = env("Prayer Room <noreply@thec3.uk>", key="DEFAULT_FROM_EMAIL")
+    DEFAULT_FROM_EMAIL = env(
+        "Tim Creamer Prayer Room <prayer@thec3.uk>", key="DEFAULT_FROM_EMAIL"
+    )
 
     def ANYMAIL(self):
         return {
             "AMAZON_SES_CLIENT_PARAMS": {
-                "region_name": os.environ.get("AWS_SES_REGION", "eu-west-1"),
+                "region_name": os.environ.get("AWS_SES_REGION", "eu-west-2"),
             },
         }
 
