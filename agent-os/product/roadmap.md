@@ -61,7 +61,7 @@ User engagement and communication features.
 - [x] Seed templates for all notification types
 
 ### Remaining (Manual Setup)
-- [ ] AWS SES configuration and domain verification
+- [x] AWS SES configuration and domain verification
 - [ ] Environment variables for production email settings
 - [ ] User notification preferences UI
 

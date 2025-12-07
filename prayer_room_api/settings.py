@@ -203,6 +203,8 @@ class Settings(BaseSettings):
                     "django_htmx",
                     "neapolitan",
                     "django_filters",
+                    "django_prodserver",
+                    "django_celery_beat",
                     "prayer_room_api",
                 ],
             )
@@ -293,6 +295,18 @@ class Settings(BaseSettings):
             # Fallback in case the state containing the `next` URL is lost and the handshake
             # with the third-party provider fails.
             "socialaccount_login_error": "https://app.project.org/account/provider/callback",
+        }
+
+    def PRODUCTION_PROCESSES(self):
+        # Note: Only web process uses prodserver. Celery worker/beat use direct
+        # commands due to django-prodserver celery backend limitations.
+        return {
+            "web": {
+                "BACKEND": "django_prodserver.backends.gunicorn.GunicornServer",
+                "ARGS": {
+                    "bind": f"0.0.0.0:{os.environ.get('PORT', '8000')}",
+                },
+            },
         }
 
 

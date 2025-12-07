@@ -1,7 +1,6 @@
 import os
 
 from celery import Celery
-from celery.schedules import crontab
 
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "prayer_room_api.settings")
@@ -17,23 +16,8 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
 
-# Celery Beat schedule for periodic tasks
-app.conf.beat_schedule = {
-    "moderator-digest-hourly": {
-        "task": "prayer_room_api.tasks.send_moderator_digest",
-        "schedule": crontab(minute=0),  # Every hour at :00
-    },
-    "user-digest-daily": {
-        "task": "prayer_room_api.tasks.send_user_digest",
-        "schedule": crontab(hour=8, minute=0),  # Daily at 8am
-        "args": ("daily",),
-    },
-    "user-digest-weekly": {
-        "task": "prayer_room_api.tasks.send_user_digest",
-        "schedule": crontab(hour=8, minute=0, day_of_week=1),  # Monday 8am
-        "args": ("weekly",),
-    },
-}
+# Beat schedules are now managed via django-celery-beat (database-backed).
+# See Django Admin > Periodic Tasks to manage schedules.
 
 
 @app.task(bind=True, ignore_result=True)
