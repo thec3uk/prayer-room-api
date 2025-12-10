@@ -318,7 +318,7 @@ class StagingSettings(Settings):
     STATIC_ROOT = env(env.Required)
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-    CORS_ALLOWED_ORIGINS = ["https://staging-prayer-room-api.dokku.thec3.uk"]
+    CORS_ALLOWED_ORIGIN_REGEXES = [r"https://[\w-]+-\d+--prayer-room\.netlify\.app/"]
 
     ALLOWED_HOSTS = ["staging-prayer-room-api.dokku.thec3.uk"] + [
         f"172.17.0.{num}" for num in range(2, 255)
