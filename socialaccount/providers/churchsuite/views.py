@@ -6,15 +6,10 @@ from allauth.socialaccount.providers.oauth2.views import (
 )
 
 
-
 class ChurchsuiteOAuth2Adapter(OAuth2Adapter):
     provider_id = "churchsuite"
-    userinfo_url = "https://api.churchsuite.com/v1/my/details"
-
-    @property
-    def base_url(self):
-        key = self.get_provider().app.key
-        return f"https://{key}.churchsuite.com/oauth"
+    userinfo_url = "https://api.churchsuite.com/v2/account/users/current"
+    base_url = "https://login.churchsuite.com/oauth2"
 
     @property
     def authorize_url(self):
@@ -25,14 +20,18 @@ class ChurchsuiteOAuth2Adapter(OAuth2Adapter):
         return f"{self.base_url}/token"
 
     def complete_login(self, request, app, token, **kwargs):
-        key = self.get_provider().app.key
         resp = (
             get_adapter()
             .get_requests_session()
-            .get(self.userinfo_url, headers={"X-Auth": token.token, 'X-Account': key, 'X-Application': "Prayer Room"})
+            .get(
+                self.userinfo_url,
+                headers={
+                    "Authorization": f"Bearer {token.token}",
+                },
+            )
         )
         resp.raise_for_status()
-        extra_data = resp.json()
+        extra_data = resp.json()["data"]
         return self.get_provider().sociallogin_from_response(request, extra_data)
 
 
