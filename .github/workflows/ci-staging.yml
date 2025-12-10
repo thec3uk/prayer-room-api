@@ -77,6 +77,6 @@ jobs:
         with:
           git_remote_url: "ssh://dokku@dokku.thec3.uk:22/staging-prayer-room-api"
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          branch: "staging"
+          branch: "main"
           git_push_flags: "--force"
           ssh_host_key: ${{ secrets.SSH_HOST_KEY }}
