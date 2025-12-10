@@ -1,10 +1,10 @@
-from typing import Any
 import logging
+from typing import Any
 
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.conf import settings
-from django.http import HttpRequest
 from django.contrib.auth.models import Group
+from django.http import HttpRequest
 
 from .models import UserProfile
 
@@ -30,14 +30,11 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             if tag["id"] in MODERATOR_TAG_IDS
         ]
 
-        print(moderator_tags, all(moderator_tags))
-
         if all(moderator_tags):
             user.is_staff = True
             user.save()
             group, created = Group.objects.get_or_create(name="Staff")
-            group.user_set.add(user)
-            # user.
+            group.users.add(user)
 
         # print("USER HERE")
         

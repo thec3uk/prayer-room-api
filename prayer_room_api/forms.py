@@ -1,5 +1,28 @@
 from django import forms
 
+from .models import EmailTemplate
+
+
+class EmailTemplateForm(forms.ModelForm):
+    class Meta:
+        model = EmailTemplate
+        fields = ["template_type", "subject", "body_markdown", "is_active"]
+        widgets = {
+            "template_type": forms.Select(attrs={"readonly": True, "disabled": True}),
+            "subject": forms.TextInput(
+                attrs={
+                    "class": "form-input",
+                }
+            ),
+            "body_markdown": forms.Textarea(
+                attrs={
+                    "class": "form-input",
+                    "rows": 15,
+                }
+            ),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-checkbox"}),
+        }
+
 
 class PrayerModerationForm(forms.Form):
     ACTION_CHOICES = [

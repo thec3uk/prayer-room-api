@@ -4,6 +4,8 @@ from import_export.admin import ImportMixin
 
 from .models import (
     BannedWord,
+    EmailLog,
+    EmailTemplate,
     HomePageContent,
     Location,
     PrayerInspiration,
@@ -27,13 +29,15 @@ class UserProfileAdmin(admin.ModelAdmin):
         "enable_digest_notifications",
         "enable_response_notifications",
     )
+
     @admin.display()
     def name(self, obj):
-        return obj.user.first_name    
-        
+        return obj.user.first_name
+
     @admin.display()
     def email(self, obj):
-        return obj.user.email    
+        return obj.user.email
+
 
 @admin.register(Location)
 class LocationAdmin(ImportMixin, admin.ModelAdmin):
@@ -104,3 +108,52 @@ class SettingsAdmin(ImportMixin, admin.ModelAdmin):
 class BannedWordAdmin(admin.ModelAdmin):
     list_display = ("word", "auto_action", "is_active")
     list_editable = ("auto_action", "is_active")
+
+
+@admin.register(EmailTemplate)
+class EmailTemplateAdmin(admin.ModelAdmin):
+    list_display = ("template_type", "subject", "is_active", "updated_at")
+    list_filter = ("is_active", "template_type")
+    readonly_fields = ("created_at", "updated_at")
+    change_list_template = "admin/prayer_room_api/emailtemplate/change_list.html"
+
+    fieldsets = (
+        (None, {"fields": ("template_type", "is_active")}),
+        (
+            "Content",
+            {
+                "fields": ("subject", "body_markdown"),
+                "description": "Use Markdown for formatting. Django template variables: {{ variable_name }}",
+            },
+        ),
+        (
+            "Metadata",
+            {
+                "fields": ("created_at", "updated_at"),
+                "classes": ("collapse",),
+            },
+        ),
+    )
+
+
+@admin.register(EmailLog)
+class EmailLogAdmin(admin.ModelAdmin):
+    list_display = ("recipient_email", "subject", "status", "sent_at", "created_at")
+    list_filter = ("status", "created_at", "template")
+    search_fields = ("recipient_email", "subject")
+    readonly_fields = (
+        "template",
+        "recipient_email",
+        "subject",
+        "status",
+        "error_message",
+        "sent_at",
+        "created_at",
+    )
+    date_hierarchy = "created_at"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

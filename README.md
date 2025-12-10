@@ -53,15 +53,9 @@ Please open a PR with your changes to allow a review to happen. Deployments will
 
 * migrate to uv tooling
 * 404 & 500 handler
-* custom admin views - neopolitan?
-  - actions to mark archived (bulk, indivdual)
-* Prayer wall pagination
+* Prayer wall API pagination
 - import the historic prayers
 
-- Digest API for all Users
-  - email
-  - Subject
-  - Content
 
 ## Doing
 
@@ -69,6 +63,13 @@ Please open a PR with your changes to allow a review to happen. Deployments will
 
 ## Done
 
+
+* custom admin views - neopolitan?
+  - actions to mark archived (bulk, indivdual)
+- Digest API for all Users
+  - email
+  - Subject
+  - Content
 * Drop disallowed host warning to Sentry
 * Create Models
 * Add Django import export

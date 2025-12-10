@@ -163,6 +163,12 @@ class Settings(BaseSettings):
         "django-insecure-y&^-#s$ee58d8&&xi_9kl1^38x)!0-1hgby+ofhdl23$8d6)$u"
     )
 
+    # Email Configuration - Console backend for development
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    DEFAULT_FROM_EMAIL = env(
+        "Tim Creamer Prayer Room <prayer@thec3.uk>", key="DEFAULT_FROM_EMAIL"
+    )
+
     # DEBUG defaults to True, but can be overridden by env var `DJANGO_DEBUG`
     DEBUG = env.bool(True, prefix="DJANGO_")
 
@@ -197,6 +203,8 @@ class Settings(BaseSettings):
                     "django_htmx",
                     "neapolitan",
                     "django_filters",
+                    "django_prodserver",
+                    "django_celery_beat",
                     "prayer_room_api",
                 ],
             )
@@ -289,6 +297,18 @@ class Settings(BaseSettings):
             "socialaccount_login_error": "https://app.project.org/account/provider/callback",
         }
 
+    def PRODUCTION_PROCESSES(self):
+        # Note: Only web process uses prodserver. Celery worker/beat use direct
+        # commands due to django-prodserver celery backend limitations.
+        return {
+            "web": {
+                "BACKEND": "django_prodserver.backends.gunicorn.GunicornServer",
+                "ARGS": {
+                    "bind": f"0.0.0.0:{os.environ.get('PORT', '8000')}",
+                },
+            },
+        }
+
 
 class StagingSettings(Settings):
     # Override
@@ -331,6 +351,19 @@ class ProdSettings(Settings):
 
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     CELERY_BROKER_URL = env(env.Required, key="RABBITMQ_URL")
+
+    # Email Configuration - AWS SES via django-anymail
+    EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
+    DEFAULT_FROM_EMAIL = env(
+        "Tim Creamer Prayer Room <prayer@thec3.uk>", key="DEFAULT_FROM_EMAIL"
+    )
+
+    def ANYMAIL(self):
+        return {
+            "AMAZON_SES_CLIENT_PARAMS": {
+                "region_name": os.environ.get("AWS_SES_REGION", "eu-west-2"),
+            },
+        }
 
     def HEADLESS_FRONTEND_URLS(self):
         return {

@@ -23,6 +23,8 @@ from rest_framework.routers import SimpleRouter
 
 from .views import (
     BannedWordCRUDView,
+    EmailTemplateCRUDView,
+    EmailTemplatePreviewView,
     FlaggedView,
     HomePageContentModelViewSet,
     LocationModelViewSet,
@@ -30,9 +32,9 @@ from .views import (
     PrayerInspirationModelViewSet,
     PrayerPraiseRequestViewSet,
     SettingModelViewSet,
+    UpdatePreferencesView,
     UserProfileViewSet,
 )
-from .views import UpdatePreferencesView
 
 router = SimpleRouter()
 router.register(r"prayer-inspiration", PrayerInspirationModelViewSet)
@@ -43,22 +45,26 @@ router.register(r"settings", SettingModelViewSet)
 router.register(r"user-profile", UserProfileViewSet, basename="user-profile")
 
 
-
-def trigger_error(request):
-    division_by_zero = 1 / 0
-
-
 urlpatterns = [
     path("", RedirectView.as_view(pattern_name="moderation"), name="home"),
     path("admin/", admin.site.urls),
     path("moderation/", ModerationView.as_view(), name="moderation"),
     path("flagged/", FlaggedView.as_view(), name="flagged"),
     *BannedWordCRUDView.get_urls(),
+    *EmailTemplateCRUDView.get_urls(),
+    path(
+        "emailtemplate/<int:pk>/preview/",
+        EmailTemplatePreviewView.as_view(),
+        name="emailtemplate-preview",
+    ),
     path("api/", include(router.urls)),
     path("auth/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
-    path("sentry-debug/", trigger_error),
-    path("api/preferences/update/", UpdatePreferencesView.as_view(), name="update-preferences"),
+    path(
+        "api/preferences/update/",
+        UpdatePreferencesView.as_view(),
+        name="update-preferences",
+    ),
 ]
 
 if settings.DEBUG is True:
