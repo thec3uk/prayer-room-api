@@ -72,7 +72,7 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
         return bool(obj.archived_at)
 
     def _auto_action(self, choice, text):
-        queryset = BannedWord.objects.filter(o_action=choice).values_list(
+        queryset = BannedWord.objects.filter(auto_action=choice).values_list(
             "word", flat=True
         )
         if any(word.lower() in text for word in queryset):
