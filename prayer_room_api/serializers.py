@@ -1,6 +1,8 @@
 from django.utils import timezone
 from rest_framework import serializers
 
+
+from django.contrib.auth.models import User
 from .models import (
     BannedWord,
     HomePageContent,
@@ -8,8 +10,8 @@ from .models import (
     PrayerInspiration,
     PrayerPraiseRequest,
     Setting,
+    UserProfile,
 )
-
 
 class PrayerInspirationSerializer(serializers.ModelSerializer):
 
@@ -44,6 +46,7 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
     )
     is_flagged = serializers.SerializerMethodField()
     is_archived = serializers.SerializerMethodField()
+    is_approved = serializers.SerializerMethodField()
     prayer_count = serializers.IntegerField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
 
@@ -60,9 +63,11 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
             "location_name",
             "is_flagged",
             "is_archived",
+            "is_approved",
             "created_at",
             "flagged_at",
             "archived_at",
+            "approved_at",
         )
 
     def get_is_flagged(self, obj):
@@ -70,6 +75,25 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
 
     def get_is_archived(self, obj):
         return bool(obj.archived_at)
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        username = request.data.get("user").get("username")
+        if username:
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                if username:
+                    # If user does not exist, create a new user
+                    email=request.data.get("user").get("email","")
+                    first_name= request.data.get("user").get("name", "")
+                    user = User.objects.create_user(username,email,None,first_name=first_name)
+            validated_data['created_by'] = user
+        # Leave blank if not provided / signed in    
+        return super().create(validated_data)
+      
+    def get_is_approved(self, obj):
+        return bool(obj.approved_at)
 
     def _auto_action(self, choice, text):
         queryset = BannedWord.objects.filter(auto_action=choice).values_list(
@@ -101,3 +125,9 @@ class SettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Setting
         fields = ("name", "is_enabled", "button_text")
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['user', 'enable_digest_notifications', 'enable_response_notifications']

@@ -32,6 +32,7 @@
             <select name="auto_action" id="id_auto_action" class="form-select">
                 <option value="flag" {% if form.auto_action.value == 'flag' %}selected{% endif %}>Flag Request</option>
                 <option value="archive" {% if form.auto_action.value == 'archive' %}selected{% endif %}>Archive Request</option>
+                <option value="approve" {% if form.auto_action.value == 'approve' %}selected{% endif %}>Approve Request</option>
             </select>
             <p style="color: #666; font-size: 0.75rem; margin-top: 4px;">
                 Flag: Marks for review. Archive: Automatically hides the request.

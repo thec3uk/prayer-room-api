@@ -19,9 +19,11 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
 
     def save_user(self, request, sociallogin, form=None):
         user = super().save_user(request, sociallogin, form)
+
         if sociallogin.account.provider != "churchsuite":
             return user
-
+         
+        
         moderator_tags = [
             tag
             for tag in sociallogin.account.extra_data.get("tags")
@@ -37,6 +39,13 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             group.user_set.add(user)
             # user.
 
-        print("USER HERE")
-        UserProfile.objects.get_or_create(user=user)
+        # print("USER HERE")
+        
+        # contact_id = sociallogin.account.extra_data.get("id")
+        # if contact_id:
+        #     user_profile.churchsuite_contact_id = contact_id
+        #     user_profile.save()
+
+        # UserProfile.objects.get_or_create(user=user)
+        # user_profile, _ = UserProfile.objects.get_or_create(user=user)
         return user

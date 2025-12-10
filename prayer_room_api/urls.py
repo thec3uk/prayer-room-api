@@ -23,13 +23,16 @@ from rest_framework.routers import SimpleRouter
 
 from .views import (
     BannedWordCRUDView,
+    FlaggedView,
     HomePageContentModelViewSet,
     LocationModelViewSet,
     ModerationView,
     PrayerInspirationModelViewSet,
     PrayerPraiseRequestViewSet,
     SettingModelViewSet,
+    UserProfileViewSet,
 )
+from .views import UpdatePreferencesView
 
 router = SimpleRouter()
 router.register(r"prayer-inspiration", PrayerInspirationModelViewSet)
@@ -37,6 +40,8 @@ router.register(r"content", HomePageContentModelViewSet)
 router.register(r"prayer-requests", PrayerPraiseRequestViewSet)
 router.register(r"locations", LocationModelViewSet)
 router.register(r"settings", SettingModelViewSet)
+router.register(r"user-profile", UserProfileViewSet, basename="user-profile")
+
 
 
 def trigger_error(request):
@@ -47,11 +52,13 @@ urlpatterns = [
     path("", RedirectView.as_view(pattern_name="moderation"), name="home"),
     path("admin/", admin.site.urls),
     path("moderation/", ModerationView.as_view(), name="moderation"),
+    path("flagged/", FlaggedView.as_view(), name="flagged"),
     *BannedWordCRUDView.get_urls(),
     path("api/", include(router.urls)),
     path("auth/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
     path("sentry-debug/", trigger_error),
+    path("api/preferences/update/", UpdatePreferencesView.as_view(), name="update-preferences"),
 ]
 
 if settings.DEBUG is True:

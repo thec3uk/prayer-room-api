@@ -18,15 +18,22 @@ from .resources import PrayerRequestResource
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = (
         "pk",
-        "user",
+        "name",
+        "email",
         "enable_digest_notifications",
-        "enable_repsonse_notifications",
+        "enable_response_notifications",
     )
     list_filter = (
         "enable_digest_notifications",
-        "enable_repsonse_notifications",
+        "enable_response_notifications",
     )
-
+    @admin.display()
+    def name(self, obj):
+        return obj.user.first_name    
+        
+    @admin.display()
+    def email(self, obj):
+        return obj.user.email    
 
 @admin.register(Location)
 class LocationAdmin(ImportMixin, admin.ModelAdmin):
