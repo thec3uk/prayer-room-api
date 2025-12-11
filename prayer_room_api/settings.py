@@ -329,6 +329,11 @@ class StagingSettings(Settings):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     CELERY_BROKER_URL = env(env.Required, key="RABBITMQ_URL")
 
+    EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
+    DEFAULT_FROM_EMAIL = env(
+        "STAGING Tim Creamer Prayer Room <prayer@thec3.uk>", key="DEFAULT_FROM_EMAIL"
+    )
+
     def HEADLESS_FRONTEND_URLS(self):
         return {
             "account_confirm_email": "https://app.project.org/account/verify-email/{key}",
