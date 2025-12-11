@@ -334,6 +334,13 @@ class StagingSettings(Settings):
         "STAGING Tim Creamer Prayer Room <prayer@thec3.uk>", key="DEFAULT_FROM_EMAIL"
     )
 
+    def ANYMAIL(self):
+        return {
+            "AMAZON_SES_CLIENT_PARAMS": {
+                "region_name": os.environ.get("AWS_SES_REGION", "eu-west-2"),
+            },
+        }
+
     def HEADLESS_FRONTEND_URLS(self):
         return {
             "account_confirm_email": "https://app.project.org/account/verify-email/{key}",
