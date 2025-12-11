@@ -113,6 +113,7 @@ if SENTRY_DSN:
             # possible.
             "continuous_profiling_auto_start": True,
         },
+        environment=os.environ.get("DJANGO_MODE"),
     )
     from sentry_sdk.integrations.logging import ignore_logger
 
@@ -374,7 +375,6 @@ class ProdSettings(Settings):
         }
 
 
-print(os.environ.get("DJANGO_MODE"))
 # The `use` method will find the right sub-class of ``BaseSettings`` to use
 # Based on the value of the `DJANGO_MODE` env var.
 __getattr__, __dir__ = Settings.use()
