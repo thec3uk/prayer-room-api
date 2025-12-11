@@ -77,9 +77,11 @@ class PrayerPraiseRequestSerializer(serializers.ModelSerializer):
         return bool(obj.archived_at)
 
     def create(self, validated_data):
+        user = None
         request = self.context.get("request")
-        username = request.data.get("user", {}).get("username")
-        if username:
+        if request:
+            user_data = request.data.get("user") or {}
+            username = user_data.get("username")
             try:
                 user = User.objects.get(username=username)
             except User.DoesNotExist:
