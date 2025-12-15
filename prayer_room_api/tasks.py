@@ -66,6 +66,7 @@ def send_templated_email(template, recipient_email, context_data):
 def send_moderator_digest(self):
     """
     Hourly digest for staff users with pending and flagged requests.
+    Only sends if there has been activity in the last hour.
     """
     try:
         template = EmailTemplate.objects.get(
@@ -75,6 +76,19 @@ def send_moderator_digest(self):
     except EmailTemplate.DoesNotExist:
         logger.warning("Moderator digest template not found or inactive")
         return "Template not found or inactive"
+
+    # Check if there has been any new work for moderators in the last hour
+    one_hour_ago = timezone.now() - timezone.timedelta(hours=1)
+
+    has_new_requests = PrayerPraiseRequest.objects.filter(
+        created_at__gte=one_hour_ago
+    ).exists()
+    has_new_flags = PrayerPraiseRequest.objects.filter(
+        flagged_at__gte=one_hour_ago
+    ).exists()
+
+    if not (has_new_requests or has_new_flags):
+        return "No new requests or flags in the last hour, skipping digest"
 
     # Get staff users with email addresses
     staff_users = User.objects.filter(
