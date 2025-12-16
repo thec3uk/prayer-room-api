@@ -28,5 +28,5 @@ def check_response_change(sender, instance, **kwargs):
         from .tasks import send_response_notification
 
         # Queue the notification task
-        # send_response_notification.delay(instance.pk)
+        send_response_notification.delay(instance.pk)
         logger.info(f"Queued response notification for prayer request {instance.pk}")
