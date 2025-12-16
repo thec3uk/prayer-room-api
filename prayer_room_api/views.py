@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 
 import requests
 from allauth.socialaccount.models import SocialToken
@@ -202,6 +203,8 @@ class PrayerResponseView(View):
                 approved_at__isnull=False,
                 flagged_at__isnull=True,
                 archived_at__isnull=True,
+                # Date when prayer responses got launched
+                created_at__gte=datetime(2025, 12, 15),
             )
             .filter(Q(response_comment__isnull=True) | Q(response_comment=""))
             .order_by("created_at")
