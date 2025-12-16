@@ -1,0 +1,52 @@
+{% if prayer %}
+<div class="prayer-card">
+    <div class="prayer-card-header">
+        <div class="prayer-card-name">{{ prayer.name }}</div>
+        <div class="prayer-card-meta">
+            <span class="badge badge-{{ prayer.type }}">{{ prayer.get_type_display }}</span>
+            <span class="badge badge-location">{{ prayer.location.name }}</span>
+            <span class="prayer-card-date">{{ prayer.created_at|date:"M d, Y" }}</span>
+        </div>
+    </div>
+
+    <div class="prayer-card-content">{{ prayer.content }}</div>
+
+    <div class="response-form">
+        <textarea
+            name="response_comment"
+            class="response-textarea"
+            placeholder="Write your prayer response here..."
+            autofocus
+        ></textarea>
+    </div>
+
+    <div class="prayer-card-actions">
+        <button type="button" class="btn btn-skip"
+            hx-post="{% url 'prayer-response' %}"
+            hx-vals='{"prayer_id": "{{ prayer.id }}", "action": "skip"}'
+            hx-target="#prayer-response-content"
+            hx-swap="innerHTML swap:0.3s">
+            Skip
+        </button>
+        <button type="button" class="btn btn-save"
+            hx-post="{% url 'prayer-response' %}"
+            hx-vals='{"prayer_id": "{{ prayer.id }}", "action": "respond"}'
+            hx-include="[name=response_comment]"
+            hx-target="#prayer-response-content"
+            hx-swap="innerHTML swap:0.3s">
+            Save & Next
+        </button>
+    </div>
+
+    <div class="keyboard-hint">
+        Press <kbd>Cmd</kbd>+<kbd>Enter</kbd> or <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save
+    </div>
+</div>
+{% else %}
+<div class="prayer-card">
+    <div class="empty-state">
+        <h2>{{ empty_message }}</h2>
+        <p>Check back later for more prayer requests to respond to.</p>
+    </div>
+</div>
+{% endif %}

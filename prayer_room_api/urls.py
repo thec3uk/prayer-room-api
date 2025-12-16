@@ -31,6 +31,7 @@ from .views import (
     ModerationView,
     PrayerInspirationModelViewSet,
     PrayerPraiseRequestViewSet,
+    PrayerResponseView,
     SettingModelViewSet,
     UpdatePreferencesView,
     UserProfileViewSet,
@@ -50,6 +51,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("moderation/", ModerationView.as_view(), name="moderation"),
     path("flagged/", FlaggedView.as_view(), name="flagged"),
+    path("prayers/respond/", PrayerResponseView.as_view(), name="prayer-response"),
     *BannedWordCRUDView.get_urls(),
     *EmailTemplateCRUDView.get_urls(),
     path(

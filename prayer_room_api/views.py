@@ -1,3 +1,5 @@
+import random
+
 import requests
 from allauth.socialaccount.models import SocialToken
 from django.contrib import messages
@@ -7,13 +9,24 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, F, OuterRef, Q, Subquery, Value
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.views import View
 from django.views.generic import ListView
 from neapolitan.views import CRUDView
+
+# Empty queue messages for Prayer Response page
+EMPTY_QUEUE_MESSAGES = [
+    "You did it! The prayer inbox is gloriously empty.",
+    "No more prayers to respond to... time for a coffee break!",
+    "All caught up! You're a prayer response champion.",
+    "The queue is empty. Somewhere, angels are high-fiving.",
+    "Nothing left! You've responded to everything. Gold star for you!",
+    "Empty inbox achieved. Go forth and celebrate!",
+    "That's all, folks! The prayer queue has been conquered.",
+]
 from rest_framework import generics
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.decorators import action
@@ -22,7 +35,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from .forms import BulkModerationForm, EmailTemplateForm, PrayerModerationForm
+from .forms import (
+    BulkModerationForm,
+    EmailTemplateForm,
+    PrayerModerationForm,
+    PrayerResponseForm,
+)
 from .models import (
     BannedWord,
     EmailTemplate,
@@ -167,6 +185,82 @@ class UpdatePreferencesView(APIView):
         profile.save()
 
         return Response({"status": "Preferences updated successfully"})
+
+
+@method_decorator(staff_member_required, name="dispatch")
+class PrayerResponseView(View):
+    """Typeform-style interface for moderators to respond to prayer requests one at a time."""
+
+    template_name = "prayers/prayer_response.html"
+    partial_template_name = "prayers/_prayer_response_content.html"
+
+    def get_queryset(self):
+        """Return queryset of eligible prayer requests."""
+        return (
+            PrayerPraiseRequest.objects.select_related("location")
+            .filter(
+                approved_at__isnull=False,
+                flagged_at__isnull=True,
+                archived_at__isnull=True,
+            )
+            .filter(Q(response_comment__isnull=True) | Q(response_comment=""))
+            .order_by("created_at")
+        )
+
+    def get_object(self):
+        """Get the next eligible prayer request."""
+        return self.get_queryset().first()
+
+    def get_context_data(self, **kwargs):
+        """Build context for templates."""
+        prayer = kwargs.get("prayer") or self.get_object()
+        context = {"prayer": prayer}
+        if prayer is None:
+            context["empty_message"] = random.choice(EMPTY_QUEUE_MESSAGES)
+        return context
+
+    def render_to_response(self, context, **kwargs):
+        """Render full template or HTMX partial based on request."""
+        if self.request.htmx:
+            html = render_to_string(
+                self.partial_template_name, context, request=self.request
+            )
+            return HttpResponse(html)
+        return render(self.request, self.template_name, context)
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        prayer_id = request.POST.get("prayer_id")
+        prayer = (
+            get_object_or_404(PrayerPraiseRequest, pk=prayer_id) if prayer_id else None
+        )
+        form = PrayerResponseForm(request.POST, instance=prayer)
+        message = None
+
+        if form.is_valid():
+            action = form.cleaned_data["action"]
+
+            if action == "respond" and prayer:
+                form.save()
+                message = f"Response saved for {prayer.name}."
+
+        # Get the next eligible prayer (skip just advances without saving)
+        context = self.get_context_data()
+        response = self.render_to_response(context)
+
+        if message:
+            if request.htmx:
+                response["X-Message"] = message
+            else:
+                messages.success(request, message)
+
+        if not request.htmx:
+            return redirect("prayer-response")
+
+        return response
 
 
 @method_decorator(staff_member_required, name="dispatch")

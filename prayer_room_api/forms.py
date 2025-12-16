@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import EmailTemplate
+from .models import EmailTemplate, PrayerPraiseRequest
 
 
 class EmailTemplateForm(forms.ModelForm):
@@ -59,6 +59,38 @@ class FlaggedModerationForm(forms.Form):
 
     prayer_id = forms.IntegerField(widget=forms.HiddenInput())
     action = forms.ChoiceField(choices=ACTION_CHOICES, widget=forms.HiddenInput())
+
+
+class PrayerResponseForm(forms.ModelForm):
+    ACTION_CHOICES = [
+        ("respond", "Respond"),
+        ("skip", "Skip"),
+    ]
+
+    action = forms.ChoiceField(choices=ACTION_CHOICES, widget=forms.HiddenInput())
+
+    class Meta:
+        model = PrayerPraiseRequest
+        fields = ["response_comment"]
+        widgets = {
+            "response_comment": forms.Textarea(
+                attrs={
+                    "class": "response-textarea",
+                    "placeholder": "Write your prayer response here...",
+                }
+            ),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        action = cleaned_data.get("action")
+        response_comment = cleaned_data.get("response_comment", "").strip()
+
+        if action == "respond" and not response_comment:
+            raise forms.ValidationError("Response comment is required when responding.")
+
+        cleaned_data["response_comment"] = response_comment
+        return cleaned_data
 
 
 class BulkFlaggedModerationForm(forms.Form):

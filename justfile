@@ -9,3 +9,6 @@ manage *FLAGS:
 
 dev:
     python manage.py runserver 8001
+
+worker:
+    celery -A prayer_room_api worker --loglevel=info

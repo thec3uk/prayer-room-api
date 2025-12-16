@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Prayer Response - Tim Creamer Prayer Room{% endblock %}
+
+{% block extra_styles %}
+        .response-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 200px);
+            padding: 40px 20px;
+        }
+
+        .prayer-card {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 40px;
+            min-width: 700px;
+            width: 100%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .prayer-card-header {
+            margin-bottom: 24px;
+        }
+
+        .prayer-card-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111;
+            margin-bottom: 8px;
+        }
+
+        .prayer-card-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .badge-prayer {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .badge-praise {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .badge-location {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .prayer-card-date {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .prayer-card-content {
+            font-size: 1.125rem;
+            line-height: 1.75;
+            color: #333;
+            margin-bottom: 32px;
+            white-space: pre-wrap;
+        }
+
+        .response-form {
+            margin-bottom: 24px;
+        }
+
+        .response-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 16px;
+            font-size: 1rem;
+            line-height: 1.6;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            resize: vertical;
+            transition: border-color 0.15s ease;
+        }
+
+        .response-textarea:focus {
+            outline: none;
+            border-color: #111;
+        }
+
+        .response-textarea::placeholder {
+            color: #999;
+        }
+
+        .prayer-card-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-save {
+            background: #111;
+            color: #fff;
+            padding: 12px 24px;
+            font-size: 1rem;
+        }
+
+        .btn-save:hover:not(:disabled) {
+            background: #333;
+        }
+
+        .btn-skip {
+            background: #fff;
+            color: #666;
+            border: 1px solid #ddd;
+            padding: 12px 24px;
+            font-size: 1rem;
+        }
+
+        .btn-skip:hover:not(:disabled) {
+            background: #f9f9f9;
+            border-color: #ccc;
+        }
+
+        .keyboard-hint {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 12px;
+            text-align: right;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .response-container {
+                padding: 20px 16px;
+                min-height: calc(100vh - 160px);
+            }
+
+            .prayer-card {
+                padding: 24px;
+                border-radius: 8px;
+            }
+
+            .prayer-card-content {
+                font-size: 1rem;
+            }
+
+            .prayer-card-actions {
+                flex-direction: column;
+            }
+
+            .btn-save,
+            .btn-skip {
+                width: 100%;
+                text-align: center;
+            }
+        }
+{% endblock extra_styles %}
+
+{% block content %}
+<div class="response-container">
+    <div id="prayer-response-content">
+        {% include "prayers/_prayer_response_content.html" %}
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+    // Keyboard shortcut: Cmd/Ctrl+Enter to save
+    document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+            e.preventDefault();
+            const saveBtn = document.querySelector('.btn-save');
+            if (saveBtn && !saveBtn.disabled) {
+                saveBtn.click();
+            }
+        }
+    });
+</script>
+{% endblock extra_scripts %}
