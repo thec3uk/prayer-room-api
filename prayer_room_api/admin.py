@@ -41,7 +41,9 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Location)
 class LocationAdmin(ImportMixin, admin.ModelAdmin):
-    list_display = ("slug", "name")
+    list_display = ("slug", "name", "is_active")
+    list_filter = ("is_active",)
+    list_editable = ("name", "is_active")
 
 
 @admin.register(HomePageContent)

@@ -14,6 +14,7 @@ class PrayerInspiration(models.Model):
 class Location(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField()
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return str(self.name)

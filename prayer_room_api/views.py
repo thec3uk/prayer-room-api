@@ -78,7 +78,7 @@ class SettingModelViewSet(ReadOnlyModelViewSet):
 
 
 class LocationModelViewSet(ReadOnlyModelViewSet):
-    queryset = Location.objects.all()
+    queryset = Location.objects.filter(is_active=True)
     serializer_class = LocationSerializer
 
 
