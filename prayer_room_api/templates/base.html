@@ -5,7 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Tim Creamer Prayer Room{% endblock %}</title>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script>
+        // Apply theme immediately to prevent flash
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved) {
+                document.documentElement.setAttribute('data-theme', saved);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
     <style>
+        /* Light theme (default) */
+        :root {
+            --bg-page: #f5f5f5;
+            --bg-primary: #fff;
+            --bg-secondary: #f9fafb;
+            --bg-hover: #f0f0f0;
+            --bg-input: #fff;
+            --text-primary: #111;
+            --text-secondary: #333;
+            --text-muted: #666;
+            --text-faint: #888;
+            --border-color: #e5e5e5;
+            --border-light: #ddd;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --shadow-heavy: rgba(0, 0, 0, 0.25);
+            --backdrop-color: rgba(0, 0, 0, 0.5);
+            --btn-primary-bg: #111;
+            --btn-primary-hover: #333;
+            --btn-danger-bg: #dc2626;
+            --btn-danger-hover: #b91c1c;
+            --toast-bg: #065f46;
+            --badge-flag-bg: #fef3c7;
+            --badge-flag-text: #b45309;
+            --badge-archive-bg: #fee2e2;
+            --badge-archive-text: #dc2626;
+            --badge-approve-bg: #ADD8E6;
+            --badge-approve-text: #0057B7;
+            --badge-active-bg: #d1fae5;
+            --badge-active-text: #065f46;
+            --badge-inactive-bg: #f3f4f6;
+            --badge-inactive-text: #6b7280;
+            --action-btn-danger-text: #dc2626;
+            --action-btn-danger-border: #fecaca;
+            --action-btn-danger-hover-bg: #fef2f2;
+            --dialog-message: #555;
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] {
+            --bg-page: #121212;
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #252525;
+            --bg-hover: #2a2a2a;
+            --bg-input: #2a2a2a;
+            --text-primary: #f0f0f0;
+            --text-secondary: #d0d0d0;
+            --text-muted: #a0a0a0;
+            --text-faint: #707070;
+            --border-color: #333;
+            --border-light: #404040;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --shadow-heavy: rgba(0, 0, 0, 0.5);
+            --backdrop-color: rgba(0, 0, 0, 0.7);
+            --btn-primary-bg: #f0f0f0;
+            --btn-primary-hover: #d0d0d0;
+            --btn-danger-bg: #dc2626;
+            --btn-danger-hover: #ef4444;
+            --toast-bg: #065f46;
+            --badge-flag-bg: #78350f;
+            --badge-flag-text: #fef3c7;
+            --badge-archive-bg: #7f1d1d;
+            --badge-archive-text: #fecaca;
+            --badge-approve-bg: #1e3a5f;
+            --badge-approve-text: #ADD8E6;
+            --badge-active-bg: #064e3b;
+            --badge-active-text: #a7f3d0;
+            --badge-inactive-bg: #374151;
+            --badge-inactive-text: #d1d5db;
+            --action-btn-danger-text: #f87171;
+            --action-btn-danger-border: #7f1d1d;
+            --action-btn-danger-hover-bg: #450a0a;
+            --dialog-message: #a0a0a0;
+        }
+
+        /* Dark theme button color inversion */
+        [data-theme="dark"] .btn-primary {
+            color: #111;
+        }
+
+        [data-theme="dark"] .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            border-color: var(--border-light);
+        }
+
+        [data-theme="dark"] .btn-secondary:hover:not(:disabled) {
+            background: var(--bg-hover);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .pagination .current {
+            background: var(--text-primary);
+            color: #111;
+            border-color: var(--text-primary);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -18,15 +125,15 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
+            background: var(--bg-page);
+            color: var(--text-secondary);
             line-height: 1.5;
             min-height: 100vh;
         }
 
         .site-header {
-            background: #fff;
-            border-bottom: 1px solid #e5e5e5;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
         }
 
         /* Top row: title and user */
@@ -42,12 +149,60 @@
         .site-title {
             font-size: 1.125rem;
             font-weight: 600;
-            color: #111;
+            color: var(--text-primary);
             text-decoration: none;
         }
 
         .site-title:hover {
-            color: #333;
+            color: var(--text-secondary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            padding: 6px 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            transition: all 0.15s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-light);
+        }
+
+        .theme-toggle .icon-sun,
+        .theme-toggle .icon-moon {
+            display: none;
+        }
+
+        .theme-toggle .icon-sun {
+            color: #f59e0b;
+        }
+
+        .theme-toggle .icon-moon {
+            color: #6366f1;
+        }
+
+        :root .theme-toggle .icon-moon {
+            display: inline;
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-sun {
+            display: inline;
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-moon {
+            display: none;
         }
 
         /* User dropdown */
@@ -65,24 +220,24 @@
             gap: 6px;
             padding: 6px 12px;
             font-size: 0.875rem;
-            color: #666;
-            background: #f9f9f9;
-            border: 1px solid #e5e5e5;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.15s ease;
         }
 
         .user-dropdown-label:hover {
-            background: #f0f0f0;
-            border-color: #ddd;
+            background: var(--bg-hover);
+            border-color: var(--border-light);
         }
 
         .user-dropdown-label::after {
             content: "";
             border-left: 4px solid transparent;
             border-right: 4px solid transparent;
-            border-top: 5px solid #666;
+            border-top: 5px solid var(--text-muted);
             transition: transform 0.15s ease;
         }
 
@@ -94,10 +249,10 @@
             position: absolute;
             top: calc(100% + 4px);
             right: 0;
-            background: #fff;
-            border: 1px solid #e5e5e5;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
             border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px var(--shadow-color);
             min-width: 140px;
             opacity: 0;
             visibility: hidden;
@@ -118,7 +273,7 @@
             width: 100%;
             padding: 10px 14px;
             font-size: 0.875rem;
-            color: #666;
+            color: var(--text-muted);
             text-decoration: none;
             text-align: left;
             background: none;
@@ -129,8 +284,8 @@
 
         .user-dropdown-menu a:hover,
         .user-dropdown-menu button:hover {
-            background: #f5f5f5;
-            color: #333;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
         }
 
         .user-dropdown-menu a:first-child {
@@ -143,30 +298,30 @@
 
         .user-dropdown-divider {
             height: 1px;
-            background: #e5e5e5;
+            background: var(--border-color);
             margin: 4px 0;
         }
 
         .header-btn-login {
             padding: 6px 14px;
             font-size: 0.875rem;
-            background: #fff;
-            color: #666;
-            border: 1px solid #ddd;
+            background: var(--bg-primary);
+            color: var(--text-muted);
+            border: 1px solid var(--border-light);
             border-radius: 6px;
             text-decoration: none;
             transition: all 0.15s ease;
         }
 
         .header-btn-login:hover {
-            background: #f9f9f9;
-            border-color: #ccc;
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
         }
 
         /* Bottom row: navigation */
         .header-nav {
-            background: #f9fafb;
-            border-top: 1px solid #e5e5e5;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
         }
 
         .nav-links {
@@ -180,7 +335,7 @@
         .nav-link {
             padding: 12px 16px;
             font-size: 0.875rem;
-            color: #666;
+            color: var(--text-muted);
             text-decoration: none;
             border-bottom: 2px solid transparent;
             transition: all 0.15s ease;
@@ -191,12 +346,12 @@
         }
 
         .nav-link:hover {
-            color: #333;
+            color: var(--text-secondary);
         }
 
         .nav-link.active {
-            color: #111;
-            border-bottom-color: #111;
+            color: var(--text-primary);
+            border-bottom-color: var(--text-primary);
             font-weight: 500;
         }
 
@@ -210,11 +365,11 @@
             font-size: 1.75rem;
             font-weight: 600;
             margin-bottom: 8px;
-            color: #111;
+            color: var(--text-primary);
         }
 
         .subtitle {
-            color: #666;
+            color: var(--text-muted);
             margin-bottom: 24px;
         }
 
@@ -236,32 +391,32 @@
         }
 
         .btn-primary {
-            background: #111;
+            background: var(--btn-primary-bg);
             color: #fff;
         }
 
         .btn-primary:hover:not(:disabled) {
-            background: #333;
+            background: var(--btn-primary-hover);
         }
 
         .btn-secondary {
-            background: #fff;
-            color: #666;
-            border: 1px solid #ddd;
+            background: var(--bg-primary);
+            color: var(--text-muted);
+            border: 1px solid var(--border-light);
         }
 
         .btn-secondary:hover:not(:disabled) {
-            background: #f9f9f9;
-            border-color: #ccc;
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
         }
 
         .btn-danger {
-            background: #dc2626;
+            background: var(--btn-danger-bg);
             color: #fff;
         }
 
         .btn-danger:hover:not(:disabled) {
-            background: #b91c1c;
+            background: var(--btn-danger-hover);
         }
 
         .btn-sm {
@@ -275,7 +430,7 @@
             top: 20px;
             right: 20px;
             padding: 12px 20px;
-            background: #065f46;
+            background: var(--toast-bg);
             color: #fff;
             border-radius: 6px;
             font-size: 0.9rem;
@@ -309,7 +464,7 @@
             display: block;
             font-size: 0.875rem;
             font-weight: 500;
-            color: #333;
+            color: var(--text-secondary);
             margin-bottom: 6px;
         }
 
@@ -318,16 +473,17 @@
             width: 100%;
             padding: 10px 12px;
             font-size: 0.875rem;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-light);
             border-radius: 6px;
-            background: #fff;
+            background: var(--bg-input);
+            color: var(--text-secondary);
             transition: border-color 0.15s ease;
         }
 
         .form-input:focus,
         .form-select:focus {
             outline: none;
-            border-color: #111;
+            border-color: var(--text-primary);
         }
 
         .form-checkbox {
@@ -346,8 +502,8 @@
         /* Table styles */
         .data-table {
             width: 100%;
-            background: #fff;
-            border: 1px solid #e5e5e5;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             border-collapse: collapse;
             overflow: hidden;
@@ -357,16 +513,16 @@
         .data-table td {
             padding: 12px 16px;
             text-align: left;
-            border-bottom: 1px solid #e5e5e5;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .data-table th {
-            background: #f9fafb;
+            background: var(--bg-secondary);
             font-weight: 600;
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #666;
+            color: var(--text-muted);
         }
 
         .data-table tr:last-child td {
@@ -374,7 +530,7 @@
         }
 
         .data-table tr:hover td {
-            background: #f9fafb;
+            background: var(--bg-secondary);
         }
 
         .sort-link {
@@ -386,7 +542,7 @@
         }
 
         .sort-link:hover {
-            color: #111;
+            color: var(--text-primary);
         }
 
         .sort-icon {
@@ -403,28 +559,28 @@
         }
 
         .badge-flag {
-            background: #fef3c7;
-            color: #b45309;
+            background: var(--badge-flag-bg);
+            color: var(--badge-flag-text);
         }
 
         .badge-archive {
-            background: #fee2e2;
-            color: #dc2626;
+            background: var(--badge-archive-bg);
+            color: var(--badge-archive-text);
         }
 
         .badge-approve {
-            background: #ADD8E6;
-            color: #0057B7;
+            background: var(--badge-approve-bg);
+            color: var(--badge-approve-text);
         }
 
         .badge-active {
-            background: #d1fae5;
-            color: #065f46;
+            background: var(--badge-active-bg);
+            color: var(--badge-active-text);
         }
 
         .badge-inactive {
-            background: #f3f4f6;
-            color: #6b7280;
+            background: var(--badge-inactive-bg);
+            color: var(--badge-inactive-text);
         }
 
         /* Search and toolbar */
@@ -447,13 +603,15 @@
             flex: 1;
             padding: 8px 12px;
             font-size: 0.875rem;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-light);
             border-radius: 6px;
+            background: var(--bg-input);
+            color: var(--text-secondary);
         }
 
         .search-input:focus {
             outline: none;
-            border-color: #111;
+            border-color: var(--text-primary);
         }
 
         /* Pagination */
@@ -469,21 +627,22 @@
         .pagination span {
             padding: 8px 12px;
             font-size: 0.875rem;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-light);
             border-radius: 6px;
             text-decoration: none;
-            color: #666;
+            color: var(--text-muted);
+            background: var(--bg-primary);
         }
 
         .pagination a:hover {
-            background: #f5f5f5;
-            border-color: #ccc;
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
         }
 
         .pagination .current {
-            background: #111;
+            background: var(--btn-primary-bg);
             color: #fff;
-            border-color: #111;
+            border-color: var(--btn-primary-bg);
         }
 
         /* Dialog styles */
@@ -493,16 +652,18 @@
             padding: 0;
             max-width: 400px;
             width: 90%;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 25px 50px -12px var(--shadow-heavy);
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             margin: 0;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
         }
 
         dialog::backdrop {
-            background: rgba(0, 0, 0, 0.5);
+            background: var(--backdrop-color);
         }
 
         dialog:not([open]) {
@@ -517,11 +678,11 @@
             font-size: 1.125rem;
             font-weight: 600;
             margin-bottom: 8px;
-            color: #111;
+            color: var(--text-primary);
         }
 
         .dialog-message {
-            color: #555;
+            color: var(--dialog-message);
             margin-bottom: 24px;
         }
 
@@ -535,13 +696,13 @@
         .empty-state {
             text-align: center;
             padding: 80px 20px;
-            color: #888;
+            color: var(--text-faint);
         }
 
         .empty-state h2 {
             font-size: 1.25rem;
             font-weight: 500;
-            color: #555;
+            color: var(--dialog-message);
             margin-bottom: 8px;
         }
 
@@ -554,28 +715,28 @@
         .action-btn {
             padding: 4px 8px;
             font-size: 0.75rem;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-light);
             border-radius: 4px;
-            background: #fff;
-            color: #666;
+            background: var(--bg-primary);
+            color: var(--text-muted);
             cursor: pointer;
             text-decoration: none;
             transition: all 0.15s ease;
         }
 
         .action-btn:hover {
-            background: #f5f5f5;
-            border-color: #ccc;
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
         }
 
         .action-btn-danger {
-            color: #dc2626;
-            border-color: #fecaca;
+            color: var(--action-btn-danger-text);
+            border-color: var(--action-btn-danger-border);
         }
 
         .action-btn-danger:hover {
-            background: #fef2f2;
-            border-color: #dc2626;
+            background: var(--action-btn-danger-hover-bg);
+            border-color: var(--action-btn-danger-text);
         }
 
         @media (max-width: 600px) {
@@ -617,24 +778,30 @@
     <header class="site-header">
         <div class="header-top">
             <a href="{% url 'moderation' %}" class="site-title">Tim Creamer Prayer Room</a>
-            {% if user.is_authenticated %}
-                <div class="user-dropdown-wrapper">
-                    <input type="checkbox" id="user-dropdown-toggle" class="user-dropdown-toggle">
-                    <label for="user-dropdown-toggle" class="user-dropdown-label">
-                        {{ user.get_short_name|default:user.username }}
-                    </label>
-                    <div class="user-dropdown-menu">
-                        <a href="{% url 'admin:index' %}">Admin</a>
-                        <div class="user-dropdown-divider"></div>
-                        <form action="{% url 'admin:logout' %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit">Logout</button>
-                        </form>
+            <div class="header-right">
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+                    <span class="icon-sun">&#9728;</span>
+                    <span class="icon-moon">&#9790;</span>
+                </button>
+                {% if user.is_authenticated %}
+                    <div class="user-dropdown-wrapper">
+                        <input type="checkbox" id="user-dropdown-toggle" class="user-dropdown-toggle">
+                        <label for="user-dropdown-toggle" class="user-dropdown-label">
+                            {{ user.get_short_name|default:user.username }}
+                        </label>
+                        <div class="user-dropdown-menu">
+                            <a href="{% url 'admin:index' %}">Admin</a>
+                            <div class="user-dropdown-divider"></div>
+                            <form action="{% url 'admin:logout' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit">Logout</button>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            {% else %}
-                <a href="{% url 'admin:login' %}" class="header-btn-login">Login</a>
-            {% endif %}
+                {% else %}
+                    <a href="{% url 'admin:login' %}" class="header-btn-login">Login</a>
+                {% endif %}
+            </div>
         </div>
         <nav class="header-nav">
             <div class="nav-links">
@@ -654,6 +821,22 @@
     <div id="toast-container"></div>
 
     <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Listen for system preference changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            // Only auto-switch if user hasn't manually set a preference
+            if (!localStorage.getItem('theme')) {
+                document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+            }
+        });
+
         function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'toast';

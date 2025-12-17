@@ -8,8 +8,8 @@
             align-items: center;
             gap: 12px;
             padding: 16px;
-            background: #fff;
-            border: 1px solid #e5e5e5;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             margin-bottom: 16px;
         }
@@ -24,12 +24,12 @@
             align-items: center;
             gap: 8px;
             padding-right: 16px;
-            border-right: 1px solid #e5e5e5;
+            border-right: 1px solid var(--border-color);
         }
 
         .select-all-wrapper label {
             font-size: 0.875rem;
-            color: #555;
+            color: var(--dialog-message);
             cursor: pointer;
         }
 
@@ -40,7 +40,7 @@
 
         .selected-count {
             font-size: 0.875rem;
-            color: #666;
+            color: var(--text-muted);
             margin-left: auto;
         }
 
@@ -49,8 +49,8 @@
         }
 
         .prayer-item {
-            background: #fff;
-            border: 1px solid #e5e5e5;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 24px;
             margin-bottom: 16px;
@@ -85,7 +85,7 @@
         .prayer-name {
             font-weight: 600;
             font-size: 1rem;
-            color: #111;
+            color: var(--text-primary);
         }
 
         .prayer-meta {
@@ -97,28 +97,28 @@
         }
 
         .badge-prayer {
-            background: #eff6ff;
-            color: #1d4ed8;
+            background: var(--badge-approve-bg);
+            color: var(--badge-approve-text);
         }
 
         .badge-praise {
-            background: #fef3c7;
-            color: #b45309;
+            background: var(--badge-flag-bg);
+            color: var(--badge-flag-text);
         }
 
         .badge-location {
-            background: #f3f4f6;
-            color: #4b5563;
+            background: var(--badge-inactive-bg);
+            color: var(--badge-inactive-text);
         }
 
         .prayer-date {
             font-size: 0.85rem;
-            color: #888;
+            color: var(--text-faint);
             white-space: nowrap;
         }
 
         .prayer-content {
-            color: #444;
+            color: var(--text-secondary);
             margin-bottom: 20px;
             white-space: pre-wrap;
         }
@@ -129,23 +129,27 @@
         }
 
         .btn-approve {
-            background: #111;
+            background: var(--btn-primary-bg);
             color: #fff;
         }
 
+        [data-theme="dark"] .btn-approve {
+            color: #111;
+        }
+
         .btn-approve:hover:not(:disabled) {
-            background: #333;
+            background: var(--btn-primary-hover);
         }
 
         .btn-deny {
-            background: #fff;
-            color: #666;
-            border: 1px solid #ddd;
+            background: var(--bg-primary);
+            color: var(--text-muted);
+            border: 1px solid var(--border-light);
         }
 
         .btn-deny:hover:not(:disabled) {
-            background: #f9f9f9;
-            border-color: #ccc;
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
         }
 
         @media (max-width: 600px) {
@@ -180,7 +184,7 @@
                 padding-right: 0;
                 width: 100%;
                 padding-bottom: 12px;
-                border-bottom: 1px solid #e5e5e5;
+                border-bottom: 1px solid var(--border-color);
             }
 
             .selected-count {
@@ -189,7 +193,7 @@
                 margin-top: 8px;
             }
         }
-{% endblock %}
+{% endblock extra_styles %}
 
 {% block content %}
 <h1>Moderation</h1>
@@ -202,7 +206,7 @@
     hx-on::after-swap="this.showModal()"
     hx-on::after-request="if(event.detail.successful && event.detail.requestConfig.verb === 'post') { this.close(); }">
 </dialog>
-{% endblock %}
+{% endblock content %}
 
 {% block extra_scripts %}
 <script>
@@ -257,4 +261,4 @@
         if (e.target === dialog) dialog.close();
     });
 </script>
-{% endblock %}
+{% endblock extra_scripts %}
