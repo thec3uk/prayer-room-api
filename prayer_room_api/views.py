@@ -40,6 +40,7 @@ from .forms import (
     BulkModerationForm,
     EmailTemplateForm,
     PrayerModerationForm,
+    PrayerResourceForm,
     PrayerResponseForm,
 )
 from .models import (
@@ -49,6 +50,7 @@ from .models import (
     Location,
     PrayerInspiration,
     PrayerPraiseRequest,
+    PrayerResource,
     Setting,
     UserProfile,
 )
@@ -57,6 +59,7 @@ from .serializers import (
     LocationSerializer,
     PrayerInspirationSerializer,
     PrayerPraiseRequestSerializer,
+    PrayerResourceSerializer,
     SettingSerializer,
     UserProfileSerializer,
 )
@@ -80,6 +83,18 @@ class SettingModelViewSet(ReadOnlyModelViewSet):
 class LocationModelViewSet(ReadOnlyModelViewSet):
     queryset = Location.objects.filter(is_active=True)
     serializer_class = LocationSerializer
+
+
+class PrayerResourceViewSet(ReadOnlyModelViewSet):
+    queryset = PrayerResource.objects.select_related("section").filter(is_active=True)
+    serializer_class = PrayerResourceSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        resource_type = self.request.query_params.get("type")
+        if resource_type:
+            qs = qs.filter(resource_type=resource_type)
+        return qs
 
 
 class PrayerPraiseRequestViewSet(ModelViewSet):
@@ -657,3 +672,65 @@ class EmailTemplatePreviewView(View):
             )
         except Exception as e:
             return HttpResponse(f'<div class="alert alert-danger">Error: {e}</div>')
+
+
+@method_decorator(staff_member_required, name="dispatch")
+class PrayerResourceCRUDView(CRUDView):
+    model = PrayerResource
+    form_class = PrayerResourceForm
+    fields = ["title", "description", "resource_type", "url", "content", "is_active"]
+    url_base = "resources"
+
+    def get_queryset(self):
+        return PrayerResource.objects.select_related("section").order_by("sort_order", "-created_at")
+
+    def form_valid(self, form):
+        if not form.instance.pk:
+            from django.db.models import Max
+
+            max_order = PrayerResource.objects.aggregate(
+                max_order=Max("sort_order")
+            )["max_order"]
+            form.instance.sort_order = (max_order or 0) + 1
+        return super().form_valid(form)
+
+
+@method_decorator(staff_member_required, name="dispatch")
+class PrayerResourceReorderView(View):
+    def post(self, request):
+        import json
+
+        try:
+            order = json.loads(request.body).get("order", [])
+        except (json.JSONDecodeError, AttributeError):
+            order = []
+
+        if not order:
+            return HttpResponse(status=400)
+
+        resources = {
+            r.pk: r
+            for r in PrayerResource.objects.filter(pk__in=order).only(
+                "pk", "resource_type", "sort_order", "section"
+            )
+        }
+
+        current_section = None
+        to_update = []
+        for index, resource_id in enumerate(order):
+            resource = resources.get(resource_id)
+            if not resource:
+                continue
+            resource.sort_order = index
+            if resource.resource_type == PrayerResource.ResourceType.SECTION:
+                current_section = resource_id
+                resource.section_id = None
+            else:
+                resource.section_id = current_section
+            to_update.append(resource)
+
+        PrayerResource.objects.bulk_update(to_update, ["sort_order", "section"])
+
+        response = HttpResponse(status=204)
+        response["X-Message"] = "Resource order updated"
+        return response

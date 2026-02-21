@@ -165,3 +165,46 @@ class EmailLog(models.Model):
 
     def __str__(self):
         return f"{self.recipient_email} - {self.subject[:30]}"
+
+
+class PrayerResource(models.Model):
+    class ResourceType(models.TextChoices):
+        SECTION = "section", "Section"
+        LINK = "link", "Link"
+        VIDEO = "video", "Video"
+        AUDIO = "audio", "Audio"
+        TEXT = "text", "Text"
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, default="")
+    resource_type = models.CharField(max_length=20, choices=ResourceType.choices)
+    section = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="children",
+        limit_choices_to={"resource_type": "section"},
+    )
+    url = models.URLField(
+        blank=True,
+        default="",
+        help_text="URL for link, YouTube video, or audio resource",
+    )
+    content = models.TextField(
+        blank=True,
+        default="",
+        help_text="Body text for text-type resources",
+    )
+    sort_order = models.PositiveIntegerField(
+        default=0, help_text="Lower numbers appear first"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["sort_order", "-created_at"]
+
+    def __str__(self):
+        return self.title

@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Resources - Tim Creamer Prayer Room{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .resource-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .resource-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .resource-item:hover {
+        border-color: var(--border-light);
+    }
+
+    .resource-item.sortable-ghost {
+        opacity: 0.4;
+        background: var(--bg-secondary);
+    }
+
+    .resource-item.sortable-chosen {
+        box-shadow: 0 4px 12px var(--shadow-color);
+        border-color: var(--text-muted);
+    }
+
+    .drag-handle {
+        cursor: grab;
+        color: var(--text-faint);
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        padding: 4px;
+        user-select: none;
+    }
+
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+
+    .resource-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .resource-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .resource-meta {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 4px;
+        flex-wrap: wrap;
+    }
+
+    .resource-desc {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-top: 4px;
+    }
+
+    .resource-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .badge-section { background: var(--btn-primary-bg); color: #fff; }
+    .badge-link { background: var(--badge-approve-bg); color: var(--badge-approve-text); }
+    .badge-video { background: var(--badge-flag-bg); color: var(--badge-flag-text); }
+    .badge-audio { background: var(--badge-archive-bg); color: var(--badge-archive-text); }
+    .badge-text { background: var(--badge-inactive-bg); color: var(--badge-inactive-text); }
+
+    .resource-item.has-section {
+        margin-left: 32px;
+    }
+
+    .resource-item.is-section {
+        background: var(--bg-secondary);
+        border-left: 3px solid var(--text-primary);
+    }
+
+    .resource-item.is-section .resource-title {
+        font-size: 1.05rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .toolbar {
+        display: flex;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px 24px;
+        color: var(--text-muted);
+    }
+
+    .empty-state h2 {
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    @media (max-width: 600px) {
+        .resource-item {
+            flex-wrap: wrap;
+        }
+        .resource-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Resources</h1>
+
+<div class="toolbar">
+    <p class="subtitle" style="margin-bottom: 0;">
+        {{ object_list|length }} resource{{ object_list|length|pluralize }}
+    </p>
+    <a href="{% url 'resources-create' %}" class="btn btn-primary btn-sm" style="margin-left: auto;">Add Resource</a>
+</div>
+
+{% if object_list %}
+<ul class="resource-list" id="resource-list">
+    {% for resource in object_list %}
+    <li class="resource-item{% if resource.resource_type == 'section' %} is-section{% elif resource.section %} has-section{% endif %}" data-id="{{ resource.pk }}" data-type="{{ resource.resource_type }}">
+        <span class="drag-handle" title="Drag to reorder">&#9776;</span>
+        <div class="resource-info">
+            <div class="resource-title">{{ resource.title }}</div>
+            <div class="resource-meta">
+                <span class="badge badge-{{ resource.resource_type }}">{{ resource.get_resource_type_display }}</span>
+                <span class="badge {% if resource.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                    {% if resource.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+                {% if resource.section %}
+                    <span class="badge badge-section">{{ resource.section.title }}</span>
+                {% endif %}
+                {% if resource.url %}
+                    <a href="{{ resource.url }}" target="_blank" rel="noopener" style="font-size: 0.8rem; color: var(--text-muted);">{{ resource.url|truncatechars:40 }}</a>
+                {% endif %}
+            </div>
+            {% if resource.description %}
+                <div class="resource-desc">{{ resource.description|truncatechars:100 }}</div>
+            {% endif %}
+        </div>
+        <div class="resource-actions">
+            <a href="{% url 'resources-update' resource.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+            <a href="{% url 'resources-delete' resource.pk %}" class="btn btn-danger btn-sm">Delete</a>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<div class="empty-state">
+    <h2>No resources yet</h2>
+    <p>Add your first prayer resource.</p>
+    <a href="{% url 'resources-create' %}" class="btn btn-primary" style="margin-top: 16px;">Add Resource</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+    const list = document.getElementById('resource-list');
+    if (list) {
+        const csrfToken = JSON.parse(document.body.getAttribute('hx-headers'))['X-CSRFToken'];
+
+        function updateIndentation() {
+            let inSection = false;
+            for (const item of list.children) {
+                if (item.dataset.type === 'section') {
+                    inSection = true;
+                    item.classList.add('is-section');
+                    item.classList.remove('has-section');
+                } else {
+                    item.classList.remove('is-section');
+                    if (inSection) {
+                        item.classList.add('has-section');
+                    } else {
+                        item.classList.remove('has-section');
+                    }
+                }
+            }
+        }
+
+        updateIndentation();
+
+        Sortable.create(list, {
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: function () {
+                updateIndentation();
+                const order = Array.from(list.children).map(item => parseInt(item.dataset.id));
+                fetch('{% url "resources-reorder" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ order: order })
+                }).then(response => {
+                    const message = response.headers.get('X-Message');
+                    if (message) showToast(message);
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

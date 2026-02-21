@@ -10,6 +10,7 @@ from .models import (
     Location,
     PrayerInspiration,
     PrayerPraiseRequest,
+    PrayerResource,
     Setting,
     UserProfile,
 )
@@ -54,6 +55,15 @@ class HomePageContentAdmin(ImportMixin, admin.ModelAdmin):
 @admin.register(PrayerInspiration)
 class PrayerInspirationAdmin(ImportMixin, admin.ModelAdmin):
     list_display = ("verse", "content")
+
+
+@admin.register(PrayerResource)
+class PrayerResourceAdmin(admin.ModelAdmin):
+    list_display = ("title", "resource_type", "section", "sort_order", "is_active", "updated_at")
+    list_filter = ("resource_type", "section", "is_active")
+    list_editable = ("sort_order", "is_active")
+    search_fields = ("title", "description")
+    ordering = ("sort_order", "-created_at")
 
 
 @admin.register(PrayerPraiseRequest)

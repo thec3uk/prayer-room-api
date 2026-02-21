@@ -8,6 +8,7 @@ from .models import (
     Location,
     PrayerInspiration,
     PrayerPraiseRequest,
+    PrayerResource,
     Setting,
     UserProfile,
 )
@@ -129,6 +130,29 @@ class SettingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Setting
         fields = ("name", "is_enabled", "button_text")
+
+
+class PrayerResourceSerializer(serializers.ModelSerializer):
+    section_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PrayerResource
+        fields = (
+            "id",
+            "title",
+            "description",
+            "resource_type",
+            "section",
+            "section_name",
+            "url",
+            "content",
+            "sort_order",
+            "created_at",
+            "updated_at",
+        )
+
+    def get_section_name(self, obj):
+        return obj.section.title if obj.section else None
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

@@ -31,6 +31,9 @@ from .views import (
     ModerationView,
     PrayerInspirationModelViewSet,
     PrayerPraiseRequestViewSet,
+    PrayerResourceCRUDView,
+    PrayerResourceReorderView,
+    PrayerResourceViewSet,
     PrayerResponseView,
     SettingModelViewSet,
     UpdatePreferencesView,
@@ -43,6 +46,7 @@ router.register(r"content", HomePageContentModelViewSet)
 router.register(r"prayer-requests", PrayerPraiseRequestViewSet)
 router.register(r"locations", LocationModelViewSet)
 router.register(r"settings", SettingModelViewSet)
+router.register(r"resources", PrayerResourceViewSet)
 router.register(r"user-profile", UserProfileViewSet, basename="user-profile")
 
 
@@ -54,6 +58,12 @@ urlpatterns = [
     path("prayers/respond/", PrayerResponseView.as_view(), name="prayer-response"),
     *BannedWordCRUDView.get_urls(),
     *EmailTemplateCRUDView.get_urls(),
+    *PrayerResourceCRUDView.get_urls(),
+    path(
+        "resources/reorder/",
+        PrayerResourceReorderView.as_view(),
+        name="resources-reorder",
+    ),
     path(
         "emailtemplate/<int:pk>/preview/",
         EmailTemplatePreviewView.as_view(),

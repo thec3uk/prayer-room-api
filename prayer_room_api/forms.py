@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import EmailTemplate, PrayerPraiseRequest
+from .models import EmailTemplate, PrayerPraiseRequest, PrayerResource
 
 
 class EmailTemplateForm(forms.ModelForm):
@@ -108,3 +108,50 @@ class BulkFlaggedModerationForm(forms.Form):
             return [int(id.strip()) for id in ids_str.split(",") if id.strip()]
         except ValueError:
             raise forms.ValidationError("Invalid prayer IDs")
+
+
+class PrayerResourceForm(forms.ModelForm):
+    class Meta:
+        model = PrayerResource
+        fields = [
+            "title",
+            "description",
+            "resource_type",
+            "section",
+            "url",
+            "content",
+            "is_active",
+        ]
+        widgets = {
+            "title": forms.TextInput(
+                attrs={"class": "form-input", "placeholder": "Resource title"}
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-input",
+                    "rows": 3,
+                    "placeholder": "Brief description",
+                }
+            ),
+            "resource_type": forms.Select(attrs={"class": "form-select"}),
+            "section": forms.Select(attrs={"class": "form-select"}),
+            "url": forms.URLInput(
+                attrs={"class": "form-input", "placeholder": "https://..."}
+            ),
+            "content": forms.Textarea(
+                attrs={
+                    "class": "form-input",
+                    "rows": 8,
+                    "placeholder": "Body text for text-type resources",
+                }
+            ),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-checkbox"}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        resource_type = cleaned_data.get("resource_type")
+        section = cleaned_data.get("section")
+        if resource_type == PrayerResource.ResourceType.SECTION and section:
+            raise forms.ValidationError("Sections cannot belong to another section.")
+        return cleaned_data

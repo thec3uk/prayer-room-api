@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Resource - Tim Creamer Prayer Room{% endblock %}
+
+{% block content %}
+<h1>Delete Resource</h1>
+<p class="subtitle">Are you sure you want to delete this resource?</p>
+
+<div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; max-width: 500px;">
+    <div style="margin-bottom: 24px;">
+        <p style="font-size: 1.125rem; font-weight: 600; margin-bottom: 8px;">{{ object.title }}</p>
+        <div style="display: flex; gap: 8px;">
+            <span class="badge badge-{{ object.resource_type }}">{{ object.get_resource_type_display }}</span>
+            <span class="badge {% if object.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                {% if object.is_active %}Active{% else %}Inactive{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <p style="color: var(--text-muted); margin-bottom: 24px;">
+        This action cannot be undone.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; gap: 12px;">
+            <button type="submit" class="btn btn-danger">Delete Resource</button>
+            <a href="{% url 'resources-list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

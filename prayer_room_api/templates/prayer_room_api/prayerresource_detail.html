@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}{{ object.title }} - Resources - Tim Creamer Prayer Room{% endblock %}
+
+{% block content %}
+<h1>Resource Details</h1>
+
+<div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; max-width: 600px;">
+    <div style="margin-bottom: 24px;">
+        <p style="font-size: 1.25rem; font-weight: 600; margin-bottom: 12px;">{{ object.title }}</p>
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <span class="badge badge-{{ object.resource_type }}">{{ object.get_resource_type_display }}</span>
+            <span class="badge {% if object.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                {% if object.is_active %}Active{% else %}Inactive{% endif %}
+            </span>
+        </div>
+        {% if object.description %}
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 12px;">{{ object.description }}</p>
+        {% endif %}
+        {% if object.url %}
+            <p style="font-size: 0.875rem;">
+                <strong>URL:</strong> <a href="{{ object.url }}" target="_blank" rel="noopener">{{ object.url }}</a>
+            </p>
+        {% endif %}
+        {% if object.content %}
+            <div style="margin-top: 12px; padding: 12px; background: var(--bg-secondary); border-radius: 6px; white-space: pre-wrap;">{{ object.content }}</div>
+        {% endif %}
+    </div>
+
+    <div style="display: flex; gap: 12px;">
+        <a href="{% url 'resources-update' object.pk %}" class="btn btn-primary">Edit</a>
+        <a href="{% url 'resources-delete' object.pk %}" class="btn btn-danger">Delete</a>
+        <a href="{% url 'resources-list' %}" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+{% endblock %}

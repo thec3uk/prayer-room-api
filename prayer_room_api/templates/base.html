@@ -810,6 +810,7 @@
                 <a href="{% url 'prayer-response' %}" class="nav-link {% if request.resolver_match.url_name == 'prayer-response' %}active{% endif %}">Respond</a>
                 <a href="{% url 'bannedword-list' %}" class="nav-link {% if 'bannedword' in request.resolver_match.url_name %}active{% endif %}">Banned Words</a>
                 <a href="{% url 'emailtemplate-list' %}" class="nav-link {% if 'emailtemplate' in request.resolver_match.url_name %}active{% endif %}">Email Templates</a>
+                <a href="{% url 'resources-list' %}" class="nav-link {% if 'resources' in request.resolver_match.url_name %}active{% endif %}">Resources</a>
             </div>
         </nav>
     </header>

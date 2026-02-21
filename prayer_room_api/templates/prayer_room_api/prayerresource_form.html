@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Resource - Tim Creamer Prayer Room{% endblock %}
+
+{% block content %}
+<h1>{% if object %}Edit Resource{% else %}Add Resource{% endif %}</h1>
+<p class="subtitle">
+    {% if object %}Editing "{{ object.title }}"{% else %}Create a new prayer resource{% endif %}
+</p>
+
+<div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; max-width: 600px;">
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div style="background: var(--btn-danger-bg); color: #fff; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9rem;">
+                {% for error in form.non_field_errors %}
+                    <p style="margin: 0;">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_title">Title</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+                <p style="color: var(--btn-danger-bg); font-size: 0.875rem; margin-top: 4px;">{{ form.title.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_resource_type">Type</label>
+            {{ form.resource_type }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_section">Section</label>
+            {{ form.section }}
+            <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">
+                Assign this resource to a section. Leave blank for top-level items.
+            </p>
+        </div>
+
+        <div class="form-group">
+            <label for="id_description">Description</label>
+            {{ form.description }}
+            <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">
+                Brief description shown alongside the resource.
+            </p>
+        </div>
+
+        <div class="form-group">
+            <label for="id_url">URL</label>
+            {{ form.url }}
+            {% if form.url.errors %}
+                <p style="color: var(--btn-danger-bg); font-size: 0.875rem; margin-top: 4px;">{{ form.url.errors.0 }}</p>
+            {% endif %}
+            <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">
+                Required for Link, Video, and Audio types. Use full YouTube URL for videos.
+            </p>
+        </div>
+
+        <div class="form-group">
+            <label for="id_content">Content</label>
+            {{ form.content }}
+            <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">
+                Body text for Text-type resources.
+            </p>
+        </div>
+
+        <div class="form-group">
+            <label class="checkbox-label">
+                {{ form.is_active }}
+                Active
+            </label>
+            <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">
+                Only active resources are shown to users.
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" class="btn btn-primary">
+                {% if object %}Save Changes{% else %}Add Resource{% endif %}
+            </button>
+            <a href="{% url 'resources-list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
