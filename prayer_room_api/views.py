@@ -734,3 +734,213 @@ class PrayerResourceReorderView(View):
         response = HttpResponse(status=204)
         response["X-Message"] = "Resource order updated"
         return response
+
+
+@method_decorator(staff_member_required, name="dispatch")
+class StaffDashboardView(TemplateView):
+    """Staff home page: action tiles + 30-day activity chart."""
+
+    template_name = "prayers/dashboard.html"
+    activity_window_days = 30
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current = now()
+        today = current.date()
+        window_start_date = today - timedelta(days=self.activity_window_days - 1)
+        window_start = current - timedelta(days=self.activity_window_days - 1)
+        window_start = window_start.replace(hour=0, minute=0, second=0, microsecond=0)
+        last_24h = current - timedelta(hours=24)
+
+        prayers = PrayerPraiseRequest.objects
+
+        pending_count = prayers.filter(
+            approved_at__isnull=True, archived_at__isnull=True
+        ).count()
+        flagged_count = prayers.filter(
+            flagged_at__isnull=False, archived_at__isnull=True
+        ).count()
+        awaiting_response_count = prayers.filter(
+            approved_at__isnull=False,
+            archived_at__isnull=True,
+            flagged_at__isnull=True,
+        ).filter(Q(response_comment__isnull=True) | Q(response_comment="")).count()
+        new_today_count = prayers.filter(created_at__gte=last_24h).count()
+
+        total_approved = prayers.filter(approved_at__isnull=False).count()
+        total_archived = prayers.filter(archived_at__isnull=False).count()
+        total_active = prayers.filter(
+            approved_at__isnull=False, archived_at__isnull=True
+        ).count()
+
+        # Activity timeseries: count per day for submitted, approved, flagged.
+        # Three queries (one per timestamp column) instead of one because each
+        # series buckets on a different field.
+        submitted_by_day = dict(
+            prayers.filter(created_at__gte=window_start)
+            .annotate(day=TruncDate("created_at"))
+            .values("day")
+            .annotate(n=Count("id"))
+            .values_list("day", "n")
+        )
+        approved_by_day = dict(
+            prayers.filter(approved_at__gte=window_start)
+            .annotate(day=TruncDate("approved_at"))
+            .values("day")
+            .annotate(n=Count("id"))
+            .values_list("day", "n")
+        )
+        flagged_by_day = dict(
+            prayers.filter(flagged_at__gte=window_start)
+            .annotate(day=TruncDate("flagged_at"))
+            .values("day")
+            .annotate(n=Count("id"))
+            .values_list("day", "n")
+        )
+
+        activity = []
+        for offset in range(self.activity_window_days):
+            day = window_start_date + timedelta(days=offset)
+            activity.append(
+                {
+                    "day": day,
+                    "submitted": submitted_by_day.get(day, 0),
+                    "approved": approved_by_day.get(day, 0),
+                    "flagged": flagged_by_day.get(day, 0),
+                }
+            )
+
+        peak = max(
+            (max(d["submitted"], d["approved"]) for d in activity), default=0
+        )
+        # Round chart ceiling up to a clean number so gridlines look tidy.
+        if peak <= 5:
+            chart_max = 5
+        elif peak <= 10:
+            chart_max = 10
+        else:
+            chart_max = ((peak + 4) // 5) * 5
+
+        # SVG chart geometry. Computed server-side so the template stays
+        # purely declarative (no widthratio gymnastics, no JS plotting).
+        chart_w, chart_h = 900, 220
+        pad_t, pad_b, pad_l, pad_r = 20, 40, 40, 20
+        plot_w = chart_w - pad_l - pad_r
+        plot_h = chart_h - pad_t - pad_b
+        slot = plot_w / self.activity_window_days
+        bar_w = slot * 0.62
+
+        def y_for(value):
+            return pad_t + plot_h - (value / chart_max * plot_h if chart_max else 0)
+
+        chart_points = []
+        for i, d in enumerate(activity):
+            cx = pad_l + slot * i + slot / 2
+            submitted_h = (
+                d["submitted"] / chart_max * plot_h if chart_max else 0
+            )
+            chart_points.append(
+                {
+                    "i": i,
+                    "day": d["day"],
+                    "submitted": d["submitted"],
+                    "approved": d["approved"],
+                    "flagged": d["flagged"],
+                    "cx": round(cx, 2),
+                    "bar_x": round(cx - bar_w / 2, 2),
+                    "bar_y": round(pad_t + plot_h - submitted_h, 2),
+                    "bar_w": round(bar_w, 2),
+                    "bar_h": round(max(submitted_h, 0), 2),
+                    "approved_y": round(y_for(d["approved"]), 2),
+                    "flag_y": round(pad_t + plot_h + 14, 2),
+                }
+            )
+
+        approved_path = "M " + " L ".join(
+            f"{p['cx']} {p['approved_y']}" for p in chart_points
+        )
+
+        y_ticks = [
+            {"y": round(y_for(chart_max * frac), 2), "label": int(round(chart_max * frac))}
+            for frac in (0, 1 / 3, 2 / 3, 1)
+        ]
+
+        last_index = len(chart_points) - 1
+        x_label_indices = {i for i in range(0, last_index + 1, 7)}
+        # Always include the last day, but drop the prior weekly tick if it's
+        # within 2 days of the end (avoids label collision at the right edge).
+        x_label_indices.add(last_index)
+        x_label_indices = {
+            i for i in x_label_indices if i == last_index or last_index - i > 2
+        }
+        x_labels = [
+            {"x": round(p["cx"], 2), "day": p["day"]}
+            for p in chart_points
+            if p["i"] in x_label_indices
+        ]
+
+        context.update(
+            {
+                "tiles": [
+                    {
+                        "key": "pending",
+                        "label": "Pending moderation",
+                        "count": pending_count,
+                        "url_name": "moderation",
+                        "tone": "amber" if pending_count else "neutral",
+                        "hint": "Awaiting approve or deny",
+                    },
+                    {
+                        "key": "flagged",
+                        "label": "Flagged",
+                        "count": flagged_count,
+                        "url_name": "flagged",
+                        "tone": "red" if flagged_count else "neutral",
+                        "hint": "Needs review",
+                    },
+                    {
+                        "key": "respond",
+                        "label": "Awaiting response",
+                        "count": awaiting_response_count,
+                        "url_name": "prayer-response",
+                        "tone": "blue" if awaiting_response_count else "neutral",
+                        "hint": "Approved, no response yet",
+                    },
+                    {
+                        "key": "new",
+                        "label": "New in last 24h",
+                        "count": new_today_count,
+                        "url_name": "moderation",
+                        "tone": "neutral",
+                        "hint": "Submitted since yesterday",
+                    },
+                ],
+                "totals": {
+                    "approved": total_approved,
+                    "archived": total_archived,
+                    "active": total_active,
+                },
+                "activity": activity,
+                "activity_window_days": self.activity_window_days,
+                "chart_max": chart_max,
+                "chart": {
+                    "width": chart_w,
+                    "height": chart_h,
+                    "plot_left": pad_l,
+                    "plot_right": chart_w - pad_r,
+                    "plot_top": pad_t,
+                    "plot_bottom": pad_t + plot_h,
+                    "points": chart_points,
+                    "approved_path": approved_path,
+                    "y_ticks": y_ticks,
+                    "x_labels": x_labels,
+                    "slot": round(slot, 2),
+                },
+                "activity_totals": {
+                    "submitted": sum(d["submitted"] for d in activity),
+                    "approved": sum(d["approved"] for d in activity),
+                    "flagged": sum(d["flagged"] for d in activity),
+                },
+            }
+        )
+        return context

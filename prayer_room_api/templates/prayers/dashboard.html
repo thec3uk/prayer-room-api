@@ -1,0 +1,680 @@
+{% extends "base.html" %}
+
+{% block subtitle %}Dashboard - {% endblock %}
+
+{% block extra_styles %}
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap');
+
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .dashboard-header {
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .dashboard-eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 0.22em;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-faint);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-title {
+            font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+            font-weight: 500;
+            font-size: 2.6rem;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .dashboard-title em {
+            font-style: italic;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        /* Section heading shared style */
+        .section-eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-faint);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-eyebrow::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        /* ───── Tiles ───── */
+        .tile-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .tile {
+            position: relative;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 22px 22px 18px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 158px;
+            overflow: hidden;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .tile::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--tile-accent, var(--border-light));
+            opacity: 0.9;
+        }
+
+        .tile::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 90% 110%, var(--tile-glow, transparent), transparent 55%);
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .tile:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-light);
+            box-shadow: 0 6px 20px var(--shadow-color);
+        }
+
+        .tile-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--text-muted);
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tile-count {
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 500;
+            font-size: 3.1rem;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            color: var(--tile-count-color, var(--text-primary));
+            font-variant-numeric: tabular-nums;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tile-bottom {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-top: auto;
+            font-size: 0.78rem;
+            color: var(--text-faint);
+            position: relative;
+            z-index: 1;
+        }
+
+        .tile-cta {
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+
+        .tile-cta::after {
+            content: "→";
+            transition: transform 0.2s ease;
+        }
+
+        .tile:hover .tile-cta::after {
+            transform: translateX(3px);
+        }
+
+        /* Tile tones — mapped to existing badge tokens so dark-mode is free. */
+        .tile-amber {
+            --tile-accent: var(--badge-flag-text);
+            --tile-count-color: var(--badge-flag-text);
+            --tile-glow: var(--badge-flag-bg);
+        }
+        .tile-red {
+            --tile-accent: var(--badge-archive-text);
+            --tile-count-color: var(--badge-archive-text);
+            --tile-glow: var(--badge-archive-bg);
+        }
+        .tile-blue {
+            --tile-accent: var(--badge-approve-text);
+            --tile-count-color: var(--badge-approve-text);
+            --tile-glow: var(--badge-approve-bg);
+        }
+        .tile-neutral {
+            --tile-accent: var(--border-light);
+        }
+
+        .tile.is-zero .tile-count {
+            color: var(--text-faint);
+        }
+
+        .tile.is-zero::before {
+            opacity: 0.35;
+        }
+
+        /* ───── Activity card ───── */
+        .activity-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 26px 28px 18px;
+        }
+
+        .activity-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .activity-title {
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 500;
+            font-size: 1.55rem;
+            letter-spacing: -0.015em;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .activity-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .activity-legend {
+            display: flex;
+            gap: 18px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-swatch {
+            display: inline-block;
+            width: 14px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .swatch-submitted {
+            background: var(--bg-hover);
+            border: 1px solid var(--border-light);
+        }
+
+        .swatch-approved {
+            background: transparent;
+            border-top: 2px solid var(--badge-approve-text);
+            border-radius: 0;
+            height: 2px;
+        }
+
+        .swatch-flagged {
+            background: var(--badge-archive-text);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-total {
+            color: var(--text-faint);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Chart */
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .chart-svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .chart-bar {
+            fill: var(--bg-hover);
+            transition: fill 0.15s ease;
+        }
+
+        .chart-bar.is-empty {
+            fill: var(--bg-secondary);
+        }
+
+        .chart-grid {
+            stroke: var(--border-color);
+            stroke-dasharray: 2 5;
+            stroke-width: 1;
+        }
+
+        .chart-baseline {
+            stroke: var(--border-light);
+            stroke-width: 1;
+        }
+
+        .chart-axis-label {
+            fill: var(--text-faint);
+            font-size: 10px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .chart-line-approved {
+            fill: none;
+            stroke: var(--badge-approve-text);
+            stroke-width: 2;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+        }
+
+        .chart-dot-approved {
+            fill: var(--bg-primary);
+            stroke: var(--badge-approve-text);
+            stroke-width: 1.5;
+        }
+
+        .chart-flag {
+            fill: var(--badge-archive-text);
+        }
+
+        .chart-hover-zone {
+            fill: transparent;
+            cursor: crosshair;
+        }
+
+        .chart-hover-zone:hover ~ .chart-cursor,
+        .chart-hover-zone.is-hover ~ .chart-cursor {
+            opacity: 1;
+        }
+
+        .chart-cursor {
+            stroke: var(--text-muted);
+            stroke-width: 1;
+            stroke-dasharray: 2 3;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+            pointer-events: none;
+        }
+
+        .chart-tooltip {
+            position: absolute;
+            pointer-events: none;
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            padding: 9px 13px;
+            border-radius: 7px;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            white-space: nowrap;
+            transform: translate(-50%, -110%);
+            opacity: 0;
+            transition: opacity 0.12s ease;
+            z-index: 5;
+            box-shadow: 0 6px 16px var(--shadow-heavy);
+        }
+
+        .chart-tooltip.show {
+            opacity: 1;
+        }
+
+        .chart-tooltip-day {
+            font-weight: 600;
+            font-family: 'Fraunces', serif;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            opacity: 1;
+        }
+
+        .chart-tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            opacity: 0.85;
+        }
+
+        .chart-tooltip-row strong {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .chart-empty {
+            text-align: center;
+            color: var(--text-faint);
+            padding: 80px 0;
+            font-style: italic;
+        }
+
+        /* ───── Lifetime totals strip ───── */
+        .totals-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .total-cell {
+            padding: 20px 24px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .total-cell:last-child {
+            border-right: none;
+        }
+
+        .total-label {
+            text-transform: uppercase;
+            font-size: 0.68rem;
+            letter-spacing: 0.14em;
+            color: var(--text-faint);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .total-value {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 1.7rem;
+            font-weight: 500;
+            line-height: 1;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.02em;
+        }
+
+        @media (max-width: 800px) {
+            .tile-grid { grid-template-columns: repeat(2, 1fr); }
+            .totals-strip { grid-template-columns: 1fr; }
+            .total-cell {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .total-cell:last-child { border-bottom: none; }
+            .activity-head { flex-direction: column; align-items: stretch; }
+        }
+
+        @media (max-width: 480px) {
+            .tile-grid { grid-template-columns: 1fr; }
+            .dashboard-title { font-size: 2rem; }
+            .activity-card { padding: 20px 18px 14px; }
+        }
+{% endblock extra_styles %}
+
+{% block content %}
+<div class="dashboard">
+
+    <header class="dashboard-header">
+        <div class="dashboard-eyebrow">Staff overview</div>
+        <h1 class="dashboard-title">
+            Dashboard <em>&mdash; at a glance</em>
+        </h1>
+        <p class="dashboard-subtitle">
+            What needs your attention, and how the prayer wall has moved over the last
+            {{ activity_window_days }} days.
+        </p>
+    </header>
+
+    {# ───── Action tiles ───── #}
+    <section>
+        <div class="section-eyebrow">Needs attention</div>
+        <div class="tile-grid">
+            {% for tile in tiles %}
+            <a href="{% url tile.url_name %}"
+               class="tile tile-{{ tile.tone }}{% if tile.count == 0 %} is-zero{% endif %}">
+                <div class="tile-label">{{ tile.label }}</div>
+                <div class="tile-count">{{ tile.count }}</div>
+                <div class="tile-bottom">
+                    <span>{{ tile.hint }}</span>
+                    <span class="tile-cta">Open</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    {# ───── Activity chart ───── #}
+    <section class="activity-card">
+        <div class="activity-head">
+            <div>
+                <div class="activity-title">Prayer wall activity</div>
+                <div class="activity-sub">Last {{ activity_window_days }} days · daily totals</div>
+            </div>
+            <div class="activity-legend">
+                <span class="legend-item">
+                    <span class="legend-swatch swatch-submitted"></span>
+                    Submitted
+                    <span class="legend-total">({{ activity_totals.submitted }})</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-swatch swatch-approved"></span>
+                    Approved
+                    <span class="legend-total">({{ activity_totals.approved }})</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-swatch swatch-flagged"></span>
+                    Flagged
+                    <span class="legend-total">({{ activity_totals.flagged }})</span>
+                </span>
+            </div>
+        </div>
+
+        {% if activity_totals.submitted == 0 and activity_totals.approved == 0 %}
+            <div class="chart-empty">No activity in the last {{ activity_window_days }} days.</div>
+        {% else %}
+        <div class="chart-wrap">
+            <svg class="chart-svg"
+                 viewBox="0 0 {{ chart.width }} {{ chart.height }}"
+                 role="img"
+                 aria-label="Prayer activity over the last {{ activity_window_days }} days">
+
+                {# Y gridlines + labels #}
+                {% for tick in chart.y_ticks %}
+                <line class="chart-grid"
+                      x1="{{ chart.plot_left }}" x2="{{ chart.plot_right }}"
+                      y1="{{ tick.y }}" y2="{{ tick.y }}"></line>
+                <text class="chart-axis-label"
+                      x="{{ chart.plot_left|add:-8 }}" y="{{ tick.y|add:3 }}"
+                      text-anchor="end">{{ tick.label }}</text>
+                {% endfor %}
+
+                {# Submitted bars #}
+                {% for p in chart.points %}
+                <rect class="chart-bar{% if p.submitted == 0 %} is-empty{% endif %}"
+                      x="{{ p.bar_x }}" y="{{ p.bar_y }}"
+                      width="{{ p.bar_w }}" height="{{ p.bar_h }}"
+                      rx="2"
+                      data-day-index="{{ p.i }}"></rect>
+                {% endfor %}
+
+                {# Approved trend line #}
+                <path class="chart-line-approved" d="{{ chart.approved_path }}"></path>
+                {% for p in chart.points %}
+                {% if p.approved > 0 %}
+                <circle class="chart-dot-approved"
+                        cx="{{ p.cx }}" cy="{{ p.approved_y }}" r="3"></circle>
+                {% endif %}
+                {% endfor %}
+
+                {# Flagged markers (below the chart axis) #}
+                {% for p in chart.points %}
+                {% if p.flagged > 0 %}
+                <circle class="chart-flag" cx="{{ p.cx }}" cy="{{ p.flag_y }}" r="3"></circle>
+                {% endif %}
+                {% endfor %}
+
+                {# Baseline #}
+                <line class="chart-baseline"
+                      x1="{{ chart.plot_left }}" x2="{{ chart.plot_right }}"
+                      y1="{{ chart.plot_bottom }}" y2="{{ chart.plot_bottom }}"></line>
+
+                {# X-axis date labels #}
+                {% for label in chart.x_labels %}
+                <text class="chart-axis-label"
+                      x="{{ label.x }}" y="{{ chart.plot_bottom|add:30 }}"
+                      text-anchor="middle">{{ label.day|date:"j M" }}</text>
+                {% endfor %}
+
+                {# Hover zones — full-height invisible rects per day, last so they sit on top #}
+                <g id="chart-hover">
+                    {% for p in chart.points %}
+                    <rect class="chart-hover-zone"
+                          x="{{ p.bar_x }}" y="{{ chart.plot_top }}"
+                          width="{{ chart.slot }}" height="{{ chart.plot_bottom }}"
+                          data-i="{{ p.i }}"
+                          data-day="{{ p.day|date:'l j M Y' }}"
+                          data-cx="{{ p.cx }}"
+                          data-submitted="{{ p.submitted }}"
+                          data-approved="{{ p.approved }}"
+                          data-flagged="{{ p.flagged }}"></rect>
+                    {% endfor %}
+                </g>
+
+                <line class="chart-cursor" id="chart-cursor"
+                      x1="0" x2="0"
+                      y1="{{ chart.plot_top }}" y2="{{ chart.plot_bottom }}"></line>
+            </svg>
+
+            <div class="chart-tooltip" id="chart-tooltip" role="tooltip" aria-hidden="true">
+                <div class="chart-tooltip-day"></div>
+                <div class="chart-tooltip-row"><span>Submitted</span><strong data-key="submitted">0</strong></div>
+                <div class="chart-tooltip-row"><span>Approved</span><strong data-key="approved">0</strong></div>
+                <div class="chart-tooltip-row"><span>Flagged</span><strong data-key="flagged">0</strong></div>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+
+    {# ───── Lifetime totals ───── #}
+    <section>
+        <div class="section-eyebrow">Lifetime</div>
+        <div class="totals-strip">
+            <div class="total-cell">
+                <div class="total-label">On the wall</div>
+                <div class="total-value">{{ totals.active }}</div>
+            </div>
+            <div class="total-cell">
+                <div class="total-label">Approved (all time)</div>
+                <div class="total-value">{{ totals.approved }}</div>
+            </div>
+            <div class="total-cell">
+                <div class="total-label">Archived</div>
+                <div class="total-value">{{ totals.archived }}</div>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    const wrap = document.querySelector('.chart-wrap');
+    if (!wrap) return;
+
+    const svg = wrap.querySelector('.chart-svg');
+    const tooltip = wrap.querySelector('#chart-tooltip');
+    const cursor = wrap.querySelector('#chart-cursor');
+    const tooltipDay = tooltip.querySelector('.chart-tooltip-day');
+    const tooltipFields = {
+        submitted: tooltip.querySelector('[data-key="submitted"]'),
+        approved: tooltip.querySelector('[data-key="approved"]'),
+        flagged: tooltip.querySelector('[data-key="flagged"]'),
+    };
+
+    // Convert SVG x to wrap-relative pixels using the rendered SVG width.
+    function svgXToPx(x) {
+        const rect = svg.getBoundingClientRect();
+        const vbWidth = svg.viewBox.baseVal.width || rect.width;
+        return (x / vbWidth) * rect.width;
+    }
+    function svgYToPx(y) {
+        const rect = svg.getBoundingClientRect();
+        const vbHeight = svg.viewBox.baseVal.height || rect.height;
+        return (y / vbHeight) * rect.height;
+    }
+
+    function show(zone) {
+        const cx = parseFloat(zone.dataset.cx);
+        tooltipDay.textContent = zone.dataset.day;
+        tooltipFields.submitted.textContent = zone.dataset.submitted;
+        tooltipFields.approved.textContent = zone.dataset.approved;
+        tooltipFields.flagged.textContent = zone.dataset.flagged;
+
+        tooltip.style.left = svgXToPx(cx) + 'px';
+        tooltip.style.top = svgYToPx({{ chart.plot_top|default:20 }}) + 'px';
+        tooltip.classList.add('show');
+        tooltip.setAttribute('aria-hidden', 'false');
+
+        cursor.setAttribute('x1', cx);
+        cursor.setAttribute('x2', cx);
+        cursor.style.opacity = '1';
+    }
+
+    function hide() {
+        tooltip.classList.remove('show');
+        tooltip.setAttribute('aria-hidden', 'true');
+        cursor.style.opacity = '0';
+    }
+
+    wrap.querySelectorAll('.chart-hover-zone').forEach(zone => {
+        zone.addEventListener('mouseenter', () => show(zone));
+        zone.addEventListener('focus', () => show(zone));
+        zone.addEventListener('mouseleave', hide);
+        zone.addEventListener('blur', hide);
+    });
+
+    wrap.addEventListener('mouseleave', hide);
+})();
+</script>
+{% endblock extra_scripts %}

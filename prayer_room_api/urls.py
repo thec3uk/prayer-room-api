@@ -36,6 +36,7 @@ from .views import (
     PrayerResourceViewSet,
     PrayerResponseView,
     SettingModelViewSet,
+    StaffDashboardView,
     UpdatePreferencesView,
     UserProfileViewSet,
 )
@@ -51,7 +52,7 @@ router.register(r"user-profile", UserProfileViewSet, basename="user-profile")
 
 
 urlpatterns = [
-    path("", RedirectView.as_view(pattern_name="moderation"), name="home"),
+    path("", StaffDashboardView.as_view(), name="staff-dashboard"),
     path("admin/", admin.site.urls),
     path("moderation/", ModerationView.as_view(), name="moderation"),
     path("flagged/", FlaggedView.as_view(), name="flagged"),
