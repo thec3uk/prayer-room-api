@@ -764,6 +764,7 @@ class StaffDashboardView(TemplateView):
             approved_at__isnull=False,
             archived_at__isnull=True,
             flagged_at__isnull=True,
+            created_at__gte=datetime(2025, 12, 15),
         ).filter(Q(response_comment__isnull=True) | Q(response_comment="")).count()
         new_today_count = prayers.filter(created_at__gte=last_24h).count()
 
