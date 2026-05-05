@@ -204,81 +204,71 @@ class UpdatePreferencesView(APIView):
 
 
 @method_decorator(staff_member_required, name="dispatch")
-class PrayerResponseView(View):
-    """Typeform-style interface for moderators to respond to prayer requests one at a time."""
+class PrayerResponseView(ListView):
+    """List view for moderators to pick & choose which prayers to respond to."""
 
     template_name = "prayers/prayer_response.html"
     partial_template_name = "prayers/_prayer_response_content.html"
+    paginate_by = 25
+    context_object_name = "prayers"
 
     def get_queryset(self):
-        """Return queryset of eligible prayer requests."""
         return (
             PrayerPraiseRequest.objects.select_related("location")
             .filter(
                 approved_at__isnull=False,
                 flagged_at__isnull=True,
                 archived_at__isnull=True,
+                response_skipped_at__isnull=True,
                 # Date when prayer responses got launched
                 created_at__gte=datetime(2025, 12, 15),
             )
             .filter(Q(response_comment__isnull=True) | Q(response_comment=""))
-            .order_by("?")
+            .order_by("created_at")
         )
 
-    def get_object(self):
-        """Get the next eligible prayer request."""
-        return self.get_queryset().first()
-
     def get_context_data(self, **kwargs):
-        """Build context for templates."""
-        prayer = kwargs.get("prayer") or self.get_object()
-        context = {"prayer": prayer}
-        if prayer is None:
+        context = super().get_context_data(**kwargs)
+        if not context.get(self.context_object_name):
             context["empty_message"] = random.choice(EMPTY_QUEUE_MESSAGES)
         return context
 
     def render_to_response(self, context, **kwargs):
-        """Render full template or HTMX partial based on request."""
         if self.request.htmx:
             html = render_to_string(
                 self.partial_template_name, context, request=self.request
             )
             return HttpResponse(html)
-        return render(self.request, self.template_name, context)
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data()
-        return self.render_to_response(context)
+        return super().render_to_response(context, **kwargs)
 
     def post(self, request, *args, **kwargs):
         prayer_id = request.POST.get("prayer_id")
-        prayer = (
-            get_object_or_404(PrayerPraiseRequest, pk=prayer_id) if prayer_id else None
-        )
+        prayer = get_object_or_404(PrayerPraiseRequest, pk=prayer_id)
         form = PrayerResponseForm(request.POST, instance=prayer)
         message = None
 
         if form.is_valid():
             action = form.cleaned_data["action"]
 
-            if action == "respond" and prayer:
+            if action == "respond":
                 form.save()
                 message = f"Response saved for {prayer.name}."
+            elif action == "no_response":
+                prayer.response_skipped_at = now()
+                prayer.save(update_fields=["response_skipped_at", "updated_at"])
+                message = f"Marked {prayer.name}'s request as no response needed."
 
-        # Get the next eligible prayer (skip just advances without saving)
-        context = self.get_context_data()
-        response = self.render_to_response(context)
+        if request.htmx:
+            self.object_list = self.get_queryset()
+            context = self.get_context_data()
+            response = self.render_to_response(context)
+            if message:
+                response["X-Message"] = message
+            return response
 
         if message:
-            if request.htmx:
-                response["X-Message"] = message
-            else:
-                messages.success(request, message)
-
-        if not request.htmx:
-            return redirect("prayer-response")
-
-        return response
+            messages.success(request, message)
+        return redirect("prayer-response")
 
 
 @method_decorator(staff_member_required, name="dispatch")

@@ -47,6 +47,7 @@ class PrayerPraiseRequest(models.Model):
     flagged_at = models.DateTimeField(null=True, blank=True)
     archived_at = models.DateTimeField(null=True, blank=True)
     approved_at = models.DateTimeField(null=True, blank=True)
+    response_skipped_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.name}: {self.content[:10]}"

@@ -64,7 +64,7 @@ class FlaggedModerationForm(forms.Form):
 class PrayerResponseForm(forms.ModelForm):
     ACTION_CHOICES = [
         ("respond", "Respond"),
-        ("skip", "Skip"),
+        ("no_response", "Mark as no response"),
     ]
 
     action = forms.ChoiceField(choices=ACTION_CHOICES, widget=forms.HiddenInput())

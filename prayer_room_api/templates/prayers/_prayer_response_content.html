@@ -1,52 +1,79 @@
-{% if prayer %}
-<div class="prayer-card">
-    <div class="prayer-card-header">
-        <div class="prayer-card-name">{{ prayer.name }}</div>
-        <div class="prayer-card-meta">
-            <span class="badge badge-{{ prayer.type }}">{{ prayer.get_type_display }}</span>
-            <span class="badge badge-location">{{ prayer.location.name }}</span>
-            <span class="prayer-card-date">{{ prayer.created_at|date:"M d, Y" }}</span>
+<p class="subtitle">
+    {% if paginator.count %}
+        {{ paginator.count }} request{{ paginator.count|pluralize }} awaiting response
+        {% if is_paginated %}(showing {{ page_obj.start_index }}-{{ page_obj.end_index }}){% endif %}
+    {% else %}
+        No requests awaiting response
+    {% endif %}
+</p>
+
+{% if prayers %}
+<ul class="prayer-list">
+    {% for prayer in prayers %}
+    <li class="prayer-item" id="prayer-{{ prayer.id }}">
+        <div class="prayer-header">
+            <div>
+                <div class="prayer-name">{{ prayer.name }}</div>
+                <div class="prayer-meta">
+                    <span class="badge badge-{{ prayer.type }}">{{ prayer.get_type_display }}</span>
+                    <span class="badge badge-location">{{ prayer.location.name }}</span>
+                </div>
+            </div>
+            <div class="prayer-date">{{ prayer.created_at|date:"M d, Y" }}</div>
         </div>
-    </div>
 
-    <div class="prayer-card-content">{{ prayer.content }}</div>
+        <div class="prayer-content">{{ prayer.content }}</div>
 
-    <div class="response-form">
         <textarea
+            id="response-{{ prayer.id }}"
             name="response_comment"
             class="response-textarea"
-            placeholder="Write your prayer response here..."
-            autofocus
-        ></textarea>
-    </div>
+            placeholder="Write your prayer response here..."></textarea>
 
-    <div class="prayer-card-actions">
-        <button type="button" class="btn btn-skip"
-            hx-post="{% url 'prayer-response' %}"
-            hx-vals='{"prayer_id": "{{ prayer.id }}", "action": "skip"}'
-            hx-target="#prayer-response-content"
-            hx-swap="innerHTML swap:0.3s">
-            Skip
-        </button>
-        <button type="button" class="btn btn-save"
-            hx-post="{% url 'prayer-response' %}"
-            hx-vals='{"prayer_id": "{{ prayer.id }}", "action": "respond"}'
-            hx-include="[name=response_comment]"
-            hx-target="#prayer-response-content"
-            hx-swap="innerHTML swap:0.3s">
-            Save & Next
-        </button>
-    </div>
+        <div class="prayer-actions">
+            <button type="button" class="btn btn-no-response"
+                hx-post="{% url 'prayer-response' %}"
+                hx-vals='{"prayer_id": "{{ prayer.id }}", "action": "no_response"}'
+                hx-target="#prayer-response-content"
+                hx-swap="innerHTML swap:0.3s">
+                Mark as no response
+            </button>
+            <button type="button" class="btn btn-save"
+                hx-post="{% url 'prayer-response' %}"
+                hx-vals='{"prayer_id": "{{ prayer.id }}", "action": "respond"}'
+                hx-include="#response-{{ prayer.id }}"
+                hx-target="#prayer-response-content"
+                hx-swap="innerHTML swap:0.3s">
+                Save Response
+            </button>
+        </div>
 
-    <div class="keyboard-hint">
-        Press <kbd>Cmd</kbd>+<kbd>Enter</kbd> or <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save
-    </div>
-</div>
+        <div class="keyboard-hint">
+            Press <kbd>Cmd</kbd>+<kbd>Enter</kbd> or <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+
+{% if is_paginated %}
+<nav class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1" hx-get="{% url 'prayer-response' %}?page=1" hx-target="#prayer-response-content" hx-swap="innerHTML">&laquo; First</a>
+        <a href="?page={{ page_obj.previous_page_number }}" hx-get="{% url 'prayer-response' %}?page={{ page_obj.previous_page_number }}" hx-target="#prayer-response-content" hx-swap="innerHTML">Previous</a>
+    {% endif %}
+
+    <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" hx-get="{% url 'prayer-response' %}?page={{ page_obj.next_page_number }}" hx-target="#prayer-response-content" hx-swap="innerHTML">Next</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" hx-get="{% url 'prayer-response' %}?page={{ page_obj.paginator.num_pages }}" hx-target="#prayer-response-content" hx-swap="innerHTML">Last &raquo;</a>
+    {% endif %}
+</nav>
+{% endif %}
+
 {% else %}
-<div class="prayer-card">
-    <div class="empty-state">
-        <h2>{{ empty_message }}</h2>
-        <p>Check back later for more prayer requests to respond to.</p>
-    </div>
+<div class="empty-state">
+    <h2>{{ empty_message }}</h2>
+    <p>Check back later for more prayer requests to respond to.</p>
 </div>
 {% endif %}
